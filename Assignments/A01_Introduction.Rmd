@@ -22,21 +22,21 @@ The completed exercise is due on Tuesday, January 14th at 1:00 pm.
 
 1. What are your previous experiences with data analytics, R, and Git? Include both formal and informal training.
 
-> Answer: 
+> Answer: I played with R for stats 710 (stata based) to look at hydro data (I used Lauren Patterson's bootcamp)
 
 2. Are there any components of the course about which you feel confident?
 
-> Answer: 
+> Answer: Nope
 
 3. Are there any components of the course about which you feel apprehensive?
 
-> Answer: 
+> Answer: I trust you'll teach everything well. 
 
 
 ## 2) GitHub
 
 Provide a link below to your forked course repository in GitHub. Make sure you have pulled all recent changes from the course repository  and that you have updated your course README file. 
 
-> Answer: 
+> Answer: https://github.com/kmswann/Environmental_Data_Analytics_2020
 
 
