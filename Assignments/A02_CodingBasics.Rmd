@@ -57,28 +57,26 @@ funmean > funmedian #test
 ```{r}
 names <- c("alex", "bea", "claire", "dan") # character/string vector
 scores <- c(100,80,60,40) #numeric
-pass <- c(TRUE,TRUE,FALSE,FALSE) #logical
+pass <- c(TRUE,TRUE,TRUE,FALSE) #logical
 dframe <-data.frame(names, scores, pass)
 names(dframe)<-c("names", "scores", "pass"); View(dframe)
 ```
 
 9. QUESTION: How is this data frame different from a matrix?
 
-> Answer: It's not a matrix...it's more like a csv...it doesn't have the same requirements as matrices would have for dimensions, and you can't do linear algebra on it. 
+> Answer: It's not a matrix...it's more like a csv...it doesn't have the same requirements as matrices would have for dimensions/characters, and you can't do linear algebra on it. 
 
 10. Create a function with an if/else statement. Your function should determine whether a test score is a passing grade of 50 or above (TRUE or FALSE). You will need to choose either the `if` and `else` statements or the `ifelse` statement. Hint: Use `print`, not `return`. The name of your function should be informative.
 
 11. Apply your function to the vector with test scores that you created in number 5. 
 
 ```{r}
-Passing <- function(scores) {if scores > 60 {names} else {names}}
-
-  
-
+if (pass ==TRUE) {print ("Next Level")} else {print("Complete Failure")}
+ifelse(pass,"Next Level","Complete Failure")
 
 
 ```
 
 12. QUESTION: Which option of `if` and `else` vs. `ifelse` worked? Why?
 
-> Answer: 
+> Answer:ifelse worked. Apparently, only ifelse works for logical vectors. But, I also tried using "scores" and >< values, but that came back with the same condition has length > 1 error.  
