@@ -1,6 +1,6 @@
 ---
 title: "Assignment 2: Coding Basics"
-author: "Student Name"
+author: "Kristine Swann"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -33,10 +33,14 @@ The completed exercise is due on Tuesday, January 21 at 1:00 pm.
 
 ```{r}
 #1. 
+funfunfun <- seq(1, 100, 4) #seq from to by, named
 
 #2. 
+funmean <- mean(funfunfun) #named mean to call it up
+funmedian <- median(funfunfun) #same
 
 #3. 
+funmean > funmedian #test
 
 ```
 
@@ -51,18 +55,27 @@ The completed exercise is due on Tuesday, January 21 at 1:00 pm.
 8. Label the columns of your data frame with informative titles.
 
 ```{r}
-
+names <- c("alex", "bea", "claire", "dan") # character/string vector
+scores <- c(100,80,60,40) #numeric
+pass <- c(TRUE,TRUE,FALSE,FALSE) #logical
+dframe <-data.frame(names, scores, pass)
+names(dframe)<-c("names", "scores", "pass"); View(dframe)
 ```
 
 9. QUESTION: How is this data frame different from a matrix?
 
-> Answer: 
+> Answer: It's not a matrix...it's more like a csv...it doesn't have the same requirements as matrices would have for dimensions, and you can't do linear algebra on it. 
 
 10. Create a function with an if/else statement. Your function should determine whether a test score is a passing grade of 50 or above (TRUE or FALSE). You will need to choose either the `if` and `else` statements or the `ifelse` statement. Hint: Use `print`, not `return`. The name of your function should be informative.
 
 11. Apply your function to the vector with test scores that you created in number 5. 
 
 ```{r}
+Passing <- function(scores) {if scores > 60 {names} else {names}}
+
+  
+
+
 
 ```
 
