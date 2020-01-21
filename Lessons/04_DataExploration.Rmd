@@ -36,6 +36,8 @@ If your working directory is not set to the folder you want, you have several op
 #setwd("/Users/katerisalk/Documents/Duke/Courses/Environmental_Data_Analytics")
 ```
 
+Cannot run this code because the path is set to a specific machine and user
+
 You may change your working directory without coding by going to the Session menu in RStudio and navigating to the Set Working Directory tab. From there, you may select from a series of options to reset your working directory. 
 
 Another option is to use the R package `here`. We will not be using this option in class, but it is growing quite popular among R users. A more detailed description and rationale can be found here: https://github.com/jennybc/here_here. 
@@ -46,7 +48,8 @@ At the top of your R scripts, you should load any packages that need to be used 
 
 At the same time, you should also load your theme if you are doing any data visualization with ggplot. More on this later.
 
-```{r, message = FALSE}
+```{r, message = FALSE} 
+# if you get an error message when you knit, look for this
 # Load package
 library(tidyverse)
 ```
@@ -63,14 +66,25 @@ You may also import datasets from the Files tab, but this is not recommended sin
 # Absolute file path (not recommended)
 #read.csv("/Users/katerisalk/Documents/Duke/Courses/Environmental_Data_Analytics/Data/Raw/USGS_Site02085000_Flow_Raw.csv")
 
-# Relative file path (friendly for users regardless of machine)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# $$$~~~Relative file path (friendly for users regardless of machine)~~~$$$
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 USGS.flow.data <- read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
 
+# Delete everything up to the "./" then hit tab, and it'll theoretically give you a list of all the file options...but it doesn't here. Changed the knit director to project directory but still didn't 9work. 
+# two .. would go outside the folder (up the file directory)
+# one . goes inside the folder (down the file directory)
+# ~ will take you to your c drive
+#././ goes in two folders
+
 # What happens if we don't assign a name to our imported dataset?
-#read.csv("../Data/Raw/USGS_Site02085000_Flow_Raw.csv")
+#read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
+
+#removed the second dot and ran it; it prints out the data, you have to actually name it to call it for manipulation ; put a # infront of the code so it's not printed in the knit pdf. 
 
 # Another option is to choose with your browser
-# read.csv(file.choose())
+# read.csv(file.choose()) 
+#not reproducible because it doesn't track what file you chose. don't use it. 
 
 # To import .txt files, use read.table rather than read.csv
 #read.table()
@@ -80,15 +94,16 @@ USGS.flow.data <- read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
 ## EXPLORE YOUR DATASET
 
 Take a moment to read through the README file associated with the USGS dataset on discharge at the Eno River. Where can you find this file? How does the placement and information found in this file relate to the best practices for reproducible data analysis?
-> ANSWER: 
+> ANSWER: File found in metadata folder. Tells you who made the csv, when the data was pulled, where from, what each column means, contact info, etc. Note the naming conventions and file formats. 
 
 ```{r}
 View(USGS.flow.data)
 # Alternate option: click on data frame in Environment tab
 
 class(USGS.flow.data)
+#it's a dataframe, which means it's got a mix of data, it's 2D (not an array) 
 colnames(USGS.flow.data)
-
+# lists out the column names but you can change the function so that it renames everything (you use the assign function and apply it to the colnames fucntion)
 # Rename columns
 colnames(USGS.flow.data) <- c("agency_cd", "site_no", "datetime", 
                               "discharge.max", "discharge.max.approval", 
@@ -97,25 +112,36 @@ colnames(USGS.flow.data) <- c("agency_cd", "site_no", "datetime",
                               "gage.height.max", "gage.height.max.approval", 
                               "gage.height.min", "gage.height.min.approval", 
                               "gage.height.mean", "gage.height.mean.approval")
+
+# add [] with #s for # of given column following ".data)" to rename specific columns. 
+# only go 80 characters in on the line before hitting enter to make things easy to read. 
+
 str(USGS.flow.data)
+#structure gives basic descriptions of each column, with a lot of NAs for blank cells.BUT some columns are left blank when there are factors (characters) (A, P, and blank). 
+
 dim(USGS.flow.data)
 length(USGS.flow.data)
+#length gives # columns; width is not a thing; nrow is # rows. 
 
 head(USGS.flow.data)
 head(USGS.flow.data, 10)
 tail(USGS.flow.data, 5)
+#to see how old data compares to new data (not pretty tho)
+
 USGS.flow.data[30000:30005, c(3, 8, 14)]
+#subsect the data
 
 class(USGS.flow.data$datetime)
+#you can use this data$datetime (copy paste into console) to pull out the data for this specific column
 class(USGS.flow.data$discharge.mean)
 class(USGS.flow.data$gage.height.mean)
 
 summary(USGS.flow.data)
-
+#basic summary data
 ```
 
 What happened to blank cells in the spreadsheet when they were imported into R?
-> Answer: 
+> Answer: Blank cells stay blank if they're factor/characters, but are turned into NAs if they're numeric.
 
 ## Adjusting Datasets
 
@@ -129,16 +155,19 @@ summary(USGS.flow.data$gage.height.mean)
 ```
 Question: What types of research questions might make it favorable to remove NAs from a dataset, and what types of research questions might make it favorable to retain NAs in the dataset?
 
-> Answer: 
+> Answer: correlation matrices get messed up by NAs. If you remove NAs, entire rows will be gone. 
 
 ```{r}
 USGS.flow.data.complete <- na.omit(USGS.flow.data)
+#rename dataframe so you're not editing the original. 
 dim(USGS.flow.data)
 dim(USGS.flow.data.complete)
+#rows removed from new dataframe
 
 mean(USGS.flow.data.complete$discharge.mean)
 sd(USGS.flow.data.complete$discharge.mean)
 summary(USGS.flow.data.complete$discharge.mean)
+# summary doesn't give SD, have to code it separately.
 
 ```
 
@@ -157,7 +186,7 @@ Formatting of dates in R:
 %b  abbreviated month
 %B  unabbreviated month
 
-In some cases when dates are provided as integers, you may need to provide an origin for your dates. Beware: the "origin" date for Excel (Windows), Excel (Mac), R, and MATLAB all have different origin dates. Google this if it comes up.
+In some cases when dates are provided as integers, you may need to provide an origin for your dates. Beware: the "origin" date for Excel (Windows), Excel (Mac), R, and MATLAB all have different origin dates. Google this if it comes up. R is 1 Jan 1970
 
 ```{r}
 help(as.Date)
@@ -168,28 +197,34 @@ help(as.Date)
 # (code must be uncommented)
 today <- Sys.Date()
 format(today, format = "%B")
-#format(today, format = "")
-#format(today, format = "")
-#format(today, format = "")
+format(today, format = "%d")
+format(today, format = "%A")
+format(today, format = "")
 
 USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%m/%d/%y") 
+#what exists in the data now (as.Date)
 ```
-
+!!!
 Note that for every date prior to 1969, R has assigned the date in the 2000s rather than the 1900s. This can be fixed with an `ifelse` statement inside a function. Run through the code below and write what is happening in the comment above each line.
+!!!
 
 ```{r}
 # 
 USGS.flow.data$datetime <- format(USGS.flow.data$datetime, "%y%m%d")
+# what the date should be (format)
 
 #
 create.early.dates <- (function(d) {
        paste0(ifelse(d > 181231,"19","20"),d)
        })
-#
+# now the fixed old dates
+
 USGS.flow.data$datetime <- create.early.dates(USGS.flow.data$datetime)
 
-#
+# now replacing the wrong data with the fixed data
+
 USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%Y%m%d") 
+# reset how the date is formatted
 
 ```
 
