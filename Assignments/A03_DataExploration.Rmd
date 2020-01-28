@@ -44,7 +44,7 @@ neonic <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Insects_raw.csv")
 
 > Answer: 
 *Plots have specific dimensions with specific measurements at different locations within the plots.
-*Sampling occurs every 2 weeks
+*Sampling occurs at different intervals based on plant community.
 *
 
 
@@ -54,31 +54,33 @@ neonic <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Insects_raw.csv")
 5. What are the dimensions of the dataset?
 
 ```{r}
-
+dim(neonic)
 ```
 
 6. Using the `summary` function, determine the most common effects that are studied. Why might these effects specifically be of interest?
 ```{r}
-
+summary(neonic$Effect)
 ```
 
-> Answer: 
+> Answer: Population, mortality, behavior, feeding behavior, reproduction, development; they encompass the entire life cycle of the insects and allows identification of impacts to these potentially sensitive periods/pathways.
 
 7. Using the `summary` function, determine the six most commonly studied species in the dataset (common name). What do these species have in common, and why might they be of interest over other insects? Feel free to do a brief internet search for more information if needed.
 
 ```{r}
+summary(neonic$Species.Common.Name)
 
 ```
-
-> Answer: 
+ 
+> Answer: honey bee, parasitic wasp, buff tailed bumblebee, carniolan honey bee, bumble bee, Italian honey bee; they're all pollinators and most are non-native species that are managed by apiarists for pollination. These guys are important for agricultural production and are part of a huge subsection of the agricultural economy. 
 
 8. Concentrations are always a numeric value. What is the class of Conc.1..Author. in the dataset, and why is it not numeric?
 
 ```{r}
+class(neonic$Conc.1..Author.)
 
 ```
 
-> Answer:
+> Answer: Factor; it's a character string...
 
 
 
@@ -86,12 +88,14 @@ neonic <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Insects_raw.csv")
 
 9. Using `geom_freqpoly`, generate a plot of the number of studies conducted by publication year. 
 ```{r}
-
+ggplot(neonic) + 
+  geom_freqpoly(aes(x = Publication.Year))
 ```
 
 10. Reproduce the same graph but now add a color aesthetic so that different Test.Location are displayed as different colors.
 ```{r}
-
+ggplot(neonic) + 
+  geom_freqpoly(aes(x = Publication.Year, color = Test.Location)
 ```
 
 Interpret this graph. What are the most common test locations, and do they differ over time?
