@@ -22,9 +22,10 @@ The completed exercise is due on Tuesday, January 28 at 1:00 pm.
 ## Set up your R session
 
 1. Check your working directory, load necessary packages (tidyverse), and upload two datasets: the ECOTOX neonicotinoid dataset (ECOTOX_Neonicotinoids_Insects_raw.csv) and the Niwot Ridge NEON dataset for litter and woody debris (NEON_NIWO_Litter_massdata_2018-08_raw.csv). Name these datasets "Neonics" and "Litter", respectively. 
+```{r "setup", include=FALSE}
+knitr::opts_knit$set(root.dir = 'C:/Users/krist/Box Sync/Spring 2020/R/Environmental_Data_Analytics_2020')
+```
 ```{r,  message = FALSE}
-setwd("C:/Users/krist/Box Sync/Spring 2020/R/Environmental_Data_Analytics_2020")
-
 getwd()
 
 neonic <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Insects_raw.csv")
@@ -87,6 +88,7 @@ class(neonic$Conc.1..Author.)
 
 9. Using `geom_freqpoly`, generate a plot of the number of studies conducted by publication year. 
 ```{r}
+library(ggplot2)
 ggplot(neonic) + 
   geom_freqpoly(aes(x = Publication.Year))
 ```
