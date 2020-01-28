@@ -28,6 +28,7 @@ setwd("C:/Users/krist/Box Sync/Spring 2020/R/Environmental_Data_Analytics_2020")
 getwd()
 
 neonic <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Insects_raw.csv")
+litter <- read.csv("./Data/Raw/NEON_NIWO_Litter_massdata_2018-08_raw.csv")
 ```
 
 ## Learn about your system
@@ -43,11 +44,9 @@ neonic <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Insects_raw.csv")
 4. How is litter and woody debris sampled as part of the NEON network? Read the NEON_Litterfall_UserGuide.pdf document to learn more. List three pieces of salient information about the sampling methods here: 
 
 > Answer: 
-*Plots have specific dimensions with specific measurements at different locations within the plots.
-*Sampling occurs at different intervals based on plant community.
-*
-
-
+*Plots have specific dimensions with specific measurements at different locations within the plots for efficient measurement of multiple variables.
+*Sampling occurs at different temporal intervals based on plant community.
+*Measuring biomass of leaves, needles, twigs/branches, woody debris, seeds, etc. 
 
 ## Obtain basic summaries of your data (Neonics)
 
@@ -80,7 +79,7 @@ class(neonic$Conc.1..Author.)
 
 ```
 
-> Answer: Factor; it's a character string...
+> Answer: Factor; variable is character strings (names).
 
 
 
@@ -95,51 +94,60 @@ ggplot(neonic) +
 10. Reproduce the same graph but now add a color aesthetic so that different Test.Location are displayed as different colors.
 ```{r}
 ggplot(neonic) + 
-  geom_freqpoly(aes(x = Publication.Year, color = Test.Location)
+  geom_freqpoly(aes(x = Publication.Year, color = Test.Location))
 ```
 
 Interpret this graph. What are the most common test locations, and do they differ over time?
 
-> Answer: 
+> Answer: Most common are lab and field natural. They differ over time with lab becoming more common since approximately 2003 with a minor setback during the recession. 
 
 11. Create a bar graph of Endpoint counts. What are the two most common end points, and how are they defined? Consult the ECOTOX_CodeAppendix for more information. 
 
 ```{r}
-
+ggplot(neonic, aes(x= Endpoint)) +
+  geom_bar()
 ```
 
-> Answer: 
+> Answer: NOEL and LOELs: no observable effect level (conc with no sig effect) and lowest observed effect level (lowest conc with sig effect).  
 >
 
 ## Explore your data (Litter)
 
 12. Determine the class of collectDate. Is it a date? If not, change to a date and confirm the new class of the variable. Using the `unique` function, determine which dates litter was sampled in August 2018. 
 ```{r}
-
+class(litter$collectDate)
+litter$collectDate <- as.Date(litter$collectDate, format = "%m/%d/%y")
+class(litter$collectDate)
 ```
 
 13. Using the `unique` function, determine how many plots were sampled at Niwot Ridge. How is the information obtained from `unique` different from that obtained from `summary`?
 
 ```{r}
+unique(litter$plotID)
+summary(litter$plotID)
 
 ```
 
-> Answer: 
+> Answer: Unique lists out each unique plot id, then says how many 'levels' there are (ie how many plot ids there are. Summary just lists out the plot ids.
 
 14. Create a bar graph of functionalGroup counts. This shows you what type of litter is collected at the Niwot Ridge sites. Notice that litter types are fairly equally distributed across the Niwot Ridge sites.
 ```{r}
-
+ggplot(litter, aes(x= functionalGroup)) +
+  geom_bar()
 ```
 
 15. Using `geom_boxplot` and `geom_violin`, create a boxplot and a violin plot of dryMass by functionalGroup. 
 ```{r}
-
+ggplot(litter)+
+  geom_boxplot(aes(x=functionalGroup, y=dryMass))
+ggplot(litter)+
+  geom_violin(aes(x=functionalGroup, y=dryMass),scale = "area" )
 ```
 
 Why is the boxplot a more effective visualization option than the violin plot in this case?
 
-> Answer: 
+> Answer: The boxplot is way more effective; you can't see anything in the violin plot. I tried playing with scale in the violin plot, but that didn't change anything. 
 
 What type(s) of litter tend to have the highest biomass at these sites? 
 
-> Answer: 
+> Answer: Needles, mixed and twigs tend to have the highest biomass, which makes sense when you think about density.
