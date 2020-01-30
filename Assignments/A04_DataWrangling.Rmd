@@ -69,14 +69,24 @@ pm18$Date <- as.Date(pm18$Date, format = "%m/%d/%y")
 pm19$Date <- as.Date(pm19$Date, format = "%m/%d/%y")
 class(o318$Date)
 #4
-o318 <- select(date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
-o319 <- select(date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
-pm18 <- select(date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
-pm19 <- select(date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+o318 <- select(o318, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+o319 <- select(o319, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+pm18 <- select(pm18, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+pm19 <- select(pm19, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
 
 #5
+pm18 <- mutate(pm18, AQS_PARAMETER_DESC = "PM2.5")
+pm19 <- mutate(pm19, AQS_PARAMETER_DESC = "PM2.5")
 
 #6
+write.csv(o318, row.names = FALSE, 
+          file = "./Data/Processed/EPAair_O3_NC2018_processed.csv")
+write.csv(o319, row.names = FALSE, 
+          file = "./Data/Processed/EPAair_O3_NC2019_processed.csv")
+write.csv(pm19, row.names = FALSE, 
+          file = "./Data/Processed/EPAair_PM_NC2019_processed.csv")
+write.csv(pm18, row.names = FALSE, 
+          file = "./Data/Processed/EPAair_PM_NC2018_processed.csv")
 
 ```
 
@@ -96,7 +106,7 @@ pm19 <- select(date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SIT
 
 ```{r}
 #7
-
+aircombo <- rbind(o318, o319, pm18, pm19)
 #8
 
 #9
@@ -124,4 +134,4 @@ pm19 <- select(date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SIT
 
 14. Why did we use the function `drop_na` rather than `na.omit`?
 
-> Answer: 
+> Answer: na.omit would keep the na's there (hidden) and would mess with the summaries.
