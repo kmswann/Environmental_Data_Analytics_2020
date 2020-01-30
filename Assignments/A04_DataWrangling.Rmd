@@ -1,6 +1,6 @@
 ---
 title: "Assignment 4: Data Wrangling"
-author: "Student Name"
+author: "Kristine Swann"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -22,11 +22,37 @@ The completed exercise is due on Tuesday, February 4 at 1:00 pm.
 1. Check your working directory, load the `tidyverse` and `lubridate` packages, and upload all four raw data files associated with the EPA Air dataset. See the README file for the EPA air datasets for more information (especially if you have not worked with air quality data previously). 
 
 2. Explore the dimensions, column names, and structure of the datasets. 
+```{r "setup", include=FALSE}
+knitr::opts_knit$set(root.dir = 'C:/Users/krist/Box Sync/Spring 2020/R/Environmental_Data_Analytics_2020')
+```
 
 ```{r, message = FALSE}
+getwd()
+library(tidyverse)
+library(lubridate)
+
 #1
+o318 <- read.csv("./Data/Raw/EPAair_O3_NC2018_raw.csv")
+o319 <- read.csv("./Data/Raw/EPAair_O3_NC2019_raw.csv")
+pm18 <- read.csv("./Data/Raw/EPAair_PM25_NC2018_raw.csv")
+pm19 <- read.csv("./Data/Raw/EPAair_PM25_NC2019_raw.csv")
 
 #2
+colnames(o318)
+str(o318)
+dim(o318)
+
+colnames(o319)
+str(o319)
+dim(o319)
+
+colnames(pm18)
+str(pm18)
+dim(pm18)
+
+colnames(pm19)
+str(pm19)
+dim(pm19)
 ```
 
 ## Wrangle individual datasets to create processed files.
@@ -37,8 +63,16 @@ The completed exercise is due on Tuesday, February 4 at 1:00 pm.
 
 ```{r}
 #3
-
+o318$Date <- as.Date(o318$Date, format = "%m/%d/%y")
+o319$Date <- as.Date(o319$Date, format = "%m/%d/%y")
+pm18$Date <- as.Date(pm18$Date, format = "%m/%d/%y")
+pm19$Date <- as.Date(pm19$Date, format = "%m/%d/%y")
+class(o318$Date)
 #4
+o318 <- select(date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+o319 <- select(date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+pm18 <- select(date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+pm19 <- select(date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
 
 #5
 
