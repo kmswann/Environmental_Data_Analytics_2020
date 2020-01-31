@@ -68,6 +68,7 @@ o319$Date <- as.Date(o319$Date, format = "%m/%d/%y")
 pm18$Date <- as.Date(pm18$Date, format = "%m/%d/%y")
 pm19$Date <- as.Date(pm19$Date, format = "%m/%d/%y")
 class(o318$Date)
+interval(first(o318$Date), last(o318$Date))
 #4
 o318 <- select(o318, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
 o319 <- select(o319, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
@@ -107,14 +108,28 @@ write.csv(pm18, row.names = FALSE,
 ```{r}
 #7
 aircombo <- rbind(o318, o319, pm18, pm19)
+dim(aircombo)
 #8
-
-#9
+aircombopiped <- 
+  aircombo %>%
+  filter(Site.Name == "Linville Falls"|Site.Name ==  "Durham Armory"|Site.Name ==  "Leggett"|Site.Name ==  "Hattie Avenue"|Site.Name ==  "Clemmons Middle"|Site.Name ==  "Mendenhall School"|Site.Name ==  "Frying Pan Mountain"|Site.Name ==  "West Johnston Co."|Site.Name ==  "Garinger High School"|Site.Name ==  "Castle Hayne"|Site.Name ==  "Pitt Agri. Center"|Site.Name ==  "Bryson City"|Site.Name ==  "Millbrook School") %>%
+  group_by(Date, Site.Name, AQS_PARAMETER_DESC, COUNTY)%>%
+  summarise(meanAQI = mean(DAILY_AQI_VALUE), 
+           meanlat = mean(SITE_LATITUDE), 
+            meanlong = mean(SITE_LONGITUDE)) %>%
+    mutate(month=month(Date)) %>%
+    mutate(year = year(Date))
+  dim(aircombopiped)
+  
+  
+#9.
+aircombopiped.spread <- spread(aircombopiped, AQS_PARAMETER_DESC, meanAQI)
 
 #10
-
+dim(aircombopiped.spread)
 #11
-
+write.csv(aircombopiped.spread,row.names = FALSE, 
+          file = "./Data/Processed/EPAair_O3_PM25_NC1718_Processed.csv")
 ```
 
 
