@@ -63,10 +63,10 @@ dim(pm19)
 
 ```{r}
 #3
-o318$Date <- as.Date(o318$Date, format = "%m/%d/%y")
-o319$Date <- as.Date(o319$Date, format = "%m/%d/%y")
-pm18$Date <- as.Date(pm18$Date, format = "%m/%d/%y")
-pm19$Date <- as.Date(pm19$Date, format = "%m/%d/%y")
+o318$Date <- as.Date(o318$Date, format = "%m/%d/%Y")
+o319$Date <- as.Date(o319$Date, format = "%m/%d/%Y")
+pm18$Date <- as.Date(pm18$Date, format = "%m/%d/%Y")
+pm19$Date <- as.Date(pm19$Date, format = "%m/%d/%Y")
 class(o318$Date)
 interval(first(o318$Date), last(o318$Date))
 #4
