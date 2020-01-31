@@ -140,7 +140,11 @@ write.csv(aircombopiped.spread,row.names = FALSE,
 
 ```{r}
 #12a
-
+airsummary <- aircombopiped.spread %>%
+  group_by(Site.Name, month, year)%>%
+  summarise(meanozone = mean(Ozone), meanpm2.5 = mean(PM2.5))%>%
+  drop_na(month)%>%
+  drop_na(year)
 #12b
 
 #13
