@@ -144,11 +144,11 @@ airsummary <- aircombopiped.spread %>%
   group_by(Site.Name, month, year)%>%
   summarise(meanozone = mean(Ozone), meanpm2.5 = mean(PM2.5))%>%
   drop_na(month)%>%
-  drop_na(year)
-#12b
+  drop_na(year) #I tried at first to combine the drop of month and year with (month,year) but that didn't work...of course, it didn't work when I did (month) after that either, and I had to restart R and run this...don't want to jinx my code by going back to (month,year)!
+#12b see above?
 
 #13
-
+dim(airsummary)
 ```
 
 14. Why did we use the function `drop_na` rather than `na.omit`?
