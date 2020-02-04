@@ -55,7 +55,7 @@ Here are some commonly used layers for plotting in ggplot:
 * geom_violin
 * geom_dotplot
 * geom_density_ridges
-* geom_point
+* geom_point = scatter plot
 * geom_errorbar
 * geom_smooth
 * geom_line
@@ -80,25 +80,25 @@ ggplot(EPAair, aes(x = Date, y = Ozone)) +
 
 O3plot <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone))
-print(O3plot)
+print(O3plot) #aes = aesthetics 
 
 # Fix this code
 O3plot2 <- ggplot(EPAair) +
-  geom_point(aes(x = Date, y = Ozone, color = "blue"))
+  geom_point(aes(x = Date, y = Ozone), color = 'blue')
 print(O3plot2)
 
 # Add additional variables
 PMplot <- 
   ggplot(EPAair, aes(x = Month, y = PM2.5, shape = as.factor(Year), color = Site.Name)) +
   geom_point()
-print(PMplot)
+print(PMplot) #shape = as.factor(year) makes each year a different shape - has to have as.factor because shape applies to categorical data -converting date to category, and color = site.name will make a different color per site.name 
 
 # Separate plot with facets
 PMplot.faceted <-
   ggplot(EPAair, aes(x = Month, y = PM2.5, shape = as.factor(Year))) +
   geom_point() +
   facet_wrap(vars(Site.Name), nrow = 3)
-print(PMplot.faceted)
+print(PMplot.faceted) #facets makes different graph for each site, you can change the scale on each facet's axes  - see facet_wrap help
 
 # Filter dataset within plot building and facet by multiple variables
 PMplot.faceted2 <- 
@@ -108,6 +108,10 @@ PMplot.faceted2 <-
   geom_point() +
   facet_grid(Site.Name ~ Year) 
 print(PMplot.faceted2)
+
+#or ggplot(subset(EPAair, Site.Name %in% c("Clemmons Middle","Leggett","Bryson City"))...
+
+#Consider for MP low/high TP/other criteria by ecoregion, EPA region, nationally...
 
 # Plot true time series with geom_line
 PMplot.line <- 
@@ -121,13 +125,19 @@ print(PMplot.line)
 # 1. 
 # Plot surface temperatures by day of  year. 
 # Color your points by year, and facet by lake in two rows.
-
+Temp.facet <-
+  ggplot(subset(PeterPaul.chem.nutrients, depth == 0))+
+  geom_point(aes(x=daynum, y=temperature_C, color = year4)) + 
+           facet_grid(vars(lakename))
+print(Temp.facet)
 
 #2. 
 # Plot temperature by date. Color your points by depth.
 # Change the size of your point to 0.5
-
-
+pp.temp2<-
+  ggplot(PeterPaul.chem.nutrients)+
+  geom_point(aes(x=sampledate, y=temperature_C, color = depth), size=0.5)
+print(pp.temp2)
 ```
 ### Plotting the relationship between two continuous variables: Scatterplot
 
@@ -138,7 +148,7 @@ lightvsDO <-
   geom_point()
 print(lightvsDO)
 
-# Adjust axes
+# Adjust axes to exclude unrealistic outliers 
 lightvsDOfixed <- 
   ggplot(PeterPaul.chem.nutrients, aes(x = irradianceWater, y = dissolvedOxygen)) +
   geom_point() +
@@ -148,8 +158,8 @@ print(lightvsDOfixed)
 
 # Depth in the fields of limnology and oceanography is on a reverse scale
 tempvsdepth <- 
-  ggplot(PeterPaul.chem.nutrients, aes(x = temperature_C, y = depth)) +
-  #ggplot(PeterPaul.chem.nutrients, aes(x = temperature_C, y = depth, color = daynum)) +
+  #ggplot(PeterPaul.chem.nutrients, aes(x = temperature_C, y = depth)) +
+  ggplot(PeterPaul.chem.nutrients, aes(x = temperature_C, y = depth, color = daynum)) +
   geom_point() +
   scale_y_reverse()
 print(tempvsdepth)
@@ -157,8 +167,8 @@ print(tempvsdepth)
 NvsP <-
   ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = tn_ug, color = depth)) +
   geom_point() +
-  geom_smooth(method = lm) +
-  geom_abline(aes(slope = 16, intercept = 0))
+  geom_smooth(method = lm #loess smoothing function with CI of the model; phosphorous limited system, with higher line than the expected abline... 
+  geom_abline(aes(slope = 16, intercept = 0)) #slope of 16 is the redfield ratio N:P ratio 
 print(NvsP)
 
 # Exercise: Plot relationships between air quality measurements
@@ -188,7 +198,7 @@ Nutrientplot4 <-
   ggplot(PeterPaul.chem.nutrients.gathered, aes(x = lakename, y = concentration)) +
   geom_dotplot(aes(color = nutrient, fill = nutrient), binaxis = "y", binwidth = 1, 
                stackdir = "center", position = "dodge", dotsize = 2) #
-print(Nutrientplot4)
+print(Nutrientplot4) #dots scatter horizontally when they're around the same spot. Could be good for MP too.
 
 # Violin plot
 Nutrientplot5 <-
@@ -219,7 +229,7 @@ print(Nutrientplot7)
 # Ridgeline plot
 Nutrientplot6 <-
   ggplot(PeterPaul.chem.nutrients.gathered, aes(y = nutrient, x = concentration)) +
-  geom_density_ridges(aes(fill = lakename), alpha = 0.5) #
+  geom_density_ridges(aes(fill = lakename), alpha = 0.5) #alpha is transparency
 print(Nutrientplot6)
 
 # Exercise: Plot distributions of AQI values for EPAair
