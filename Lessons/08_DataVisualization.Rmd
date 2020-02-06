@@ -185,6 +185,7 @@ print(NvsP)
 A traditional way to display summary statistics of continuous variables is a bar plot with error bars. Let's explore why this might not be the most effective way to display this type of data. Navigate to the Caveats page on Data to Viz (https://www.data-to-viz.com/caveats.html) and find the page that explores barplots and error bars. 
 
 What might be more effective ways to display the information? Navigate to the boxplots page in the Caveats section to explore further.
+DON'T USE BOX PLOTS UNLESS IT'S COUNT DATA!!!
 
 ```{r, fig.height = 3, fig.width = 4, warning = FALSE}
 # Box and whiskers plot
