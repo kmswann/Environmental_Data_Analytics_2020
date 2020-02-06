@@ -26,12 +26,24 @@ The completed exercise is due on Tuesday, February 11 at 1:00 pm.
 1. Set up your session. Verify your working directory and load the tidyverse and cowplot packages. Upload the NTL-LTER processed data files for nutrients and chemistry/physics for Peter and Paul Lakes (tidy and gathered) and the processed data file for the Niwot Ridge litter dataset. 
 
 2. Make sure R is reading dates as date format; if not change the format to date.
+```{r "setup", include=FALSE}
+knitr::opts_knit$set(root.dir = 'C:/Users/krist/Box Sync/Spring 2020/R/Environmental_Data_Analytics_2020')
+getwd()
+```
 
 ```{r}
 #1
-
+ppl_n <- read.csv("./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaul_Processed.csv")
+ppl_cp <- read.csv("./Data/Processed/NTL-LTER_Lake_ChemistryPhysics_PeterPaul_Processed.csv")
+litter <- read.csv("./Data/Processed/NEON_NIWO_Litter_mass_trap_Processed.csv")
 
 #2
+class(ppl_cp$sampledate)
+class(ppl_n$sampledate)
+ppl_cp$sampledate <- as.Date(ppl_cp$sampledate, format = "%m/%d/%Y")
+ppl_n$sampledate <- as.Date(ppl_n$sampledate, format = "%m/%d/%Y")
+class(ppl_cp$sampledate)
+class(ppl_n$sampledate)
 
 
 ```
