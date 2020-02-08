@@ -28,6 +28,7 @@ The completed exercise is due on Tuesday, February 11 at 1:00 pm.
 2. Make sure R is reading dates as date format; if not change the format to date.
 ```{r "setup", include=FALSE}
 knitr::opts_knit$set(root.dir = 'C:/Users/krist/Box Sync/Spring 2020/R/Environmental_Data_Analytics_2020')
+library(tidyverse)
 getwd()
 ```
 
@@ -57,9 +58,12 @@ class(PeterPaul.chem.nutrients$sampledate)
 3. Build a theme and set it as your default theme.
 
 ```{r}
-mytheme <- theme_classic(base_size = 14) +
-  theme(axis.text = element_text(color = "black"), 
-        legend.position = "top") 
+
+blahtheme <- theme_classic(base_size = 14) +
+  theme(axis.text = element_text(color = "salmon"), axis.ticks = element_line(colour = 'darkseagreen4', size = 2, linetype = 'dashed'), axis.ticks.length = unit(1, "cm"),
+        legend.position = "top", plot.background= element_rect(color="gold")) #I'm sorry, but 'laser' and 'canary' should totally be colors. 
+        
+theme_set(blahtheme)        
 
 ```
 
@@ -71,6 +75,15 @@ For numbers 4-7, create ggplot graphs and adjust aesthetics to follow best pract
 ```{r}
 
 
+pxp <- ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = po4, color=lakename))+
+  scale_color_manual(name = "Lake", values = c("Paul Lake" = "slateblue3", "Peter Lake" = "darkgoldenrod2"))+
+  geom_point(alpha=0.3, size=1)+ 
+  ylim(0,50) +
+  geom_smooth(method = lm, color='black')+
+ labs( x = expression(TP ~ (mu*g / L)), y = expression(PO[4]^{"3-"})) 
+  
+print(pxp)
+
 
 ```
 
@@ -78,6 +91,35 @@ For numbers 4-7, create ggplot graphs and adjust aesthetics to follow best pract
 5. [NTL-LTER] Make three separate boxplots of (a) temperature, (b) TP, and (c) TN, with month as the x axis and lake as a color aesthetic. Then, create a cowplot that combines the three graphs. Make sure that only one legend is present and that graph axes are aligned.
 
 ```{r}
+library(cowplot)
+
+plot_wq <- function(xaes) {
+  xaes <- enquo(xaes)
+  ggplot(PeterPaul.chem.nutrients, aes(!!xaes, month)) +
+    geom_boxplot() +
+  labs(x = "Month", color = "Lake") +
+  scale_y_continuous(expand = c(0, 0)) +
+ scale_color_brewer(palette = "YlGnBu")+
+    theme(plot.margin = margin(6, 0, 6, 0))
+}
+
+# make three plots
+p1 <- plot_wq(temperature_C)
+print(p1)
+p2 <- plot_wq(tp_ug) 
+p3 <- plot_wq(tn_ug)
+
+# arrange the three plots in a single row
+prow <- plot_grid(
+  p1 + theme(legend.position="bottom"),
+  p2 + theme(legend.position="bottom"),
+  p3 + theme(legend.position="bottom"),
+  align = 'vh',
+   labels = c("Temp (C)", expression(TP ~ (mu*g / L)),expression(TN ~ (mu*g / L)),
+  hjust = -1,
+  nrow = 1
+))
+print(prow)
 
 
 ```
