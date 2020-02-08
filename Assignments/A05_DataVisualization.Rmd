@@ -50,7 +50,8 @@ PeterPaul.chem.nutrients.gathered$sampledate <- as.Date(
   PeterPaul.chem.nutrients.gathered$sampledate, format = "%Y-%m-%d")
 class(PeterPaul.chem.nutrients.gathered$sampledate)
 class(PeterPaul.chem.nutrients$sampledate)
-
+class(litter$collectDate)
+litter$collectDate <- as.Date(litter$collectDate, format = "%Y-%m-%d")
 
 
 ```
@@ -61,7 +62,8 @@ class(PeterPaul.chem.nutrients$sampledate)
 
 blahtheme <- theme_classic(base_size = 14) +
   theme(axis.text = element_text(color = "salmon"), axis.ticks = element_line(colour = 'darkseagreen4', size = 2, linetype = 'dashed'), axis.ticks.length = unit(1, "cm"),
-        legend.position = "top", plot.background= element_rect(color="gold")) #I'm sorry, but 'laser' and 'canary' should totally be colors. 
+        legend.position = "bottom")
+  
         
 theme_set(blahtheme)        
 
@@ -80,7 +82,7 @@ pxp <- ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = po4, color=lakename))
   geom_point(alpha=0.3, size=1)+ 
   ylim(0,50) +
   geom_smooth(method = lm, color='black')+
- labs( x = expression(TP ~ (mu*g / L)), y = expression(PO[4]^{"3-"})) 
+ labs( x = expression(TP ~ (mu*g / L)), y = expression(PO[4]^{"3-"}), title= "Total phosphorus vs phosphate in Peter and Paul Lakes") 
   
 print(pxp)
 
@@ -92,52 +94,78 @@ print(pxp)
 
 ```{r}
 library(cowplot)
+class(PeterPaul.chem.nutrients$month)
+PeterPaul.chem.nutrients$month <- factor(PeterPaul.chem.nutrients$month )
+class(PeterPaul.chem.nutrients$month)
 
-plot_wq <- function(xaes) {
-  xaes <- enquo(xaes)
-  ggplot(PeterPaul.chem.nutrients, aes(!!xaes, month)) +
+plot_wq <- function(ystuff) {
+  ystuff <- enquo(ystuff)
+  ggplot(PeterPaul.chem.nutrients, aes(x= month, !!ystuff, color=lakename)) +
     geom_boxplot() +
   labs(x = "Month", color = "Lake") +
   scale_y_continuous(expand = c(0, 0)) +
- scale_color_brewer(palette = "YlGnBu")+
+ scale_color_brewer(palette = "Dark2")+
     theme(plot.margin = margin(6, 0, 6, 0))
 }
 
 # make three plots
-p1 <- plot_wq(temperature_C)
-print(p1)
-p2 <- plot_wq(tp_ug) 
-p3 <- plot_wq(tn_ug)
+p1 <- plot_wq(temperature_C)+labs(y = "Temp (C)")
+p2 <- plot_wq(tp_ug)+ labs(y = expression(TP ~ (mu*g / L)))
+p3 <- plot_wq(tn_ug)+ labs(y = expression(TN ~ (mu*g / L)))
+
+#make title
+title <- ggplot()+
+  labs(title = "Some water quality parameters by lake and month")
+# make legend
+legend <- get_legend(p1 + 
+    guides(color = guide_legend(nrow = 1)) +
+    theme(legend.position = "bottom"))
+
 
 # arrange the three plots in a single row
-prow <- plot_grid(
-  p1 + theme(legend.position="bottom"),
-  p2 + theme(legend.position="bottom"),
-  p3 + theme(legend.position="bottom"),
+threescompany <- plot_grid(
+  p1 + theme(legend.position="none"),
+  p2 + theme(legend.position="none"),
+  p3 + theme(legend.position="none"),
   align = 'vh',
-   labels = c("Temp (C)", expression(TP ~ (mu*g / L)),expression(TN ~ (mu*g / L)),
   hjust = -1,
   nrow = 1
-))
-print(prow)
+)
 
+# add the titl and legend 
+tada <- plot_grid(title, threescompany, legend, ncol = 1, rel_heights = c(.1, 1, .1))
 
+print(tada)
 ```
 
 Question: What do you observe about the variables of interest over seasons and between lakes? 
 
-> Answer: 
+> Answer: Temperature looks like it has no outliers and the two lakes are fairly similar in their distribution. TP and TN distributions are higher for Peter Lake in summer months, and both nutrient measures have a lot of right-tailed outliers.
 
 6. [Niwot Ridge] Plot a subset of the litter dataset by displaying only the "Needles" functional group. Plot the dry mass of needle litter by date and separate by NLCD class with a color aesthetic. (no need to adjust the name of each land use)
 
 7. [Niwot Ridge] Now, plot the same plot but with NLCD classes separated into three facets rather than separated by color. 
 
 ```{r}
+needle1 <- ggplot(filter(litter, functionalGroup=="Needles"), aes(x = collectDate, y = dryMass, color=nlcdClass))+
+  scale_color_brewer(palette = "Dark2")+
+  geom_point(alpha=0.7, size=1)+ 
+ labs( x = "Date", y = "Dry Mass (g)", title= "Needle in the hay", color = "NLCD Class")+
+  scale_x_date(date_breaks = "2 months", date_labels = "%b %y")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+print(needle1)
 
+needle2 <- ggplot(filter(litter, functionalGroup=="Needles"), aes(x = collectDate, y = dryMass))+
+  geom_point(alpha=0.3, size=1)+ 
+ labs( x = "Date", y = "Dry Mass (g)", title= "Needle in the hay (live version)")+
+  scale_x_date(date_breaks = "2 months", date_labels = "%b %y")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+facet_wrap(vars(nlcdClass), nrow = 3)
+print(needle2) 
 
 ```
 
 Question: Which of these plots (6 vs. 7) do you think is more effective, and why? 
 
-> Answer: 
+> Answer: Plot 6 isn't great, but it's better than the faceted one. You can't easily compare the data in 7. Neither are great for assessing differences by NLCD because it's just the raw data scattered by date. It would be more functional to do boxplots or violin plots by NLCD by month or year. (BTW, title here is a Elliott Smith reference)
