@@ -1,6 +1,6 @@
 ---
 title: "Assignment 6: GLMs week 1 (t-test and ANOVA)"
-author: "Student Name"
+author: "Kristine Swann"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -29,9 +29,19 @@ The completed exercise is due on Tuesday, February 18 at 1:00 pm.
 
 ```{r, message = FALSE}
 #1
+knitr::opts_knit$set(root.dir = 'C:/Users/krist/Box Sync/Spring 2020/R/Environmental_Data_Analytics_2020')
+getwd()
+library(tidyverse)
+library(cowplot)
+library(agricolae)
+ppp_nut <- read.csv("./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaul_Processed.csv")
 
 
 #2
+ppp_nut$sampledate <- as.Date(ppp_nut$sampledate, format = "%Y-%m-%d")
+class(ppp_nut$sampledate)
+head(ppp_nut$sampledate)
+
 
 ```
 
@@ -40,7 +50,14 @@ The completed exercise is due on Tuesday, February 18 at 1:00 pm.
 
 3. Wrangle your dataset so that it contains only surface depths and only the years 1993-1996, inclusive. Set month as a factor.
 ```{r}
-
+class(ppp_nut$month)
+ppp_nut_cleaned <- 
+  ppp_nut %>%
+filter(depth == 0) %>%
+  filter(year4, c(1993,1994,1995,1996))
+ppp_nut_cleaned$month <- factor(ppp_nut_cleaned$month)
+write.csv(ppp_nut_cleaned, row.names = FALSE, 
+          file ="./Data/Processed/ppp_nut_cleaned.csv")
 
 ```
 
@@ -50,7 +67,7 @@ Peter Lake was manipulated with additions of nitrogen and phosphorus over the ye
 
 4. Which application of the GLM will you use (t-test, one-way ANOVA, two-way ANOVA with main effects, or two-way ANOVA with interaction effects)? Justify your choice.
 
-> Answer: 
+> Answer: 2 way anovas with interaction effects; there are multiple categories here - lakename and month, and there may be an interaction between month and nutrient concentrations.
 
 5. Run your test for TN. Include examination of groupings and consider interaction effects, if relevant.
 
@@ -58,10 +75,32 @@ Peter Lake was manipulated with additions of nitrogen and phosphorus over the ye
 
 ```{r}
 #5
+shapiro.test(ppp_nut_cleaned$tn_ug[ppp_nut_cleaned$lakename == "Peter Lake"])
+shapiro.test(ppp_nut_cleaned$tn_ug[ppp_nut_cleaned$lakename == "Paul Lake"])
+shapiro.test(ppp_nut_cleaned$tn_ug[ppp_nut_cleaned$month == "5"])
+shapiro.test(ppp_nut_cleaned$tn_ug[ppp_nut_cleaned$month == "6"])
+#some normal, some not normal
 
+qqnorm(ppp_nut_cleaned$tn_ug); qqline(ppp_nut_cleaned$tn_ug) #right tailed
+
+# Test for equal variance
+bartlett.test(ppp_nut_cleaned$tn_ug ~ ppp_nut_cleaned$lakename)
+bartlett.test(ppp_nut_cleaned$tn_ug ~ ppp_nut_cleaned$month)
+#both sig variance
+
+pp.tn.anova.2way <- aov(data = ppp_nut_cleaned, tn_ug ~ lakename * month)
+summary(pp.tn.anova.2way)
+#Month was not significant on its own and the interaction between month and lakename wasn't signficant either. There is a significant difference between Peter and Paul TN levels regardless of month monitored (XX. 
 
 #6
 
+bartlett.test(ppp_nut_cleaned$tp_ug ~ ppp_nut_cleaned$lakename)
+bartlett.test(ppp_nut_cleaned$tp_ug ~ ppp_nut_cleaned$month)
+#both sig variance
+
+pp.tp.anova.2way <- aov(data = ppp_nut_cleaned, tp_ug ~ lakename * month)
+summary(pp.tp.anova.2way)
+#Month was not significant on its own and the interaction between month and lakename wasn't signficant either - although the interaction was 'more' signficiant than that for TN. There is a significant difference between Peter and Paul TP levels regardless of month monitored (XX. 
 
 ```
 
