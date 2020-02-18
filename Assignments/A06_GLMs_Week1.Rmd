@@ -127,6 +127,8 @@ tp.groups <- HSD.test(pp.tp.anova.2way2, "tp.interaction", group = TRUE)
 tp.groups
 #The groupings here are similar to those for TN. They show that there's a lot of overap in significance between months and lakes - ie the letters bleed between Peter Lake and Paul lake designations. Here, they're slightly more split between the lakes, with all a's occurring in Peter, and all but one c occuring in Paul. I'm wondering if this relates to the slightly more (still not) significant interaction effect for TP. 
 
+#NOTE: the HSD tests are superfluous because the interaction didn't exist. Really, when groupings are done, as can be seen in the figures below, the only paramter that matters is which lake has the higher values for TN/TP. This is Peter in every case. The figures reflect this by having just an a/b labeling scheme. 
+
 ```
 
 7. Create two plots, with TN (plot 1) or TP (plot 2) as the response variable and month and lake as the predictor variables. Hint: you may use some of the code you used for your visualization assignment. Assign groupings with letters, as determined from your tests. Adjust your axes, aesthetics, and color palettes in accordance with best data visualization practices.
@@ -135,26 +137,26 @@ tp.groups
 
 ```{r}
 #7
-tn.anova.plot <- ggplot(ppp_nut_cleaned, aes(y = tn_ug, x = lakename, color =  month)) +
+tn.anova.plot <- ggplot(ppp_nut_cleaned, aes(y = tn_ug, x = month, color =  lakename)) +
   geom_boxplot()+
 stat_summary(geom = "text", fun.y = max, vjust = -1, size = 3.5,
-             label = c("c", "c", "bc", "bc","c","abc","abc","ab","a", "abc"), position = position_dodge(0.75), show.legend=FALSE)+
+             label = c("a", "b", "a", "b","a","b","a","b","a", "b"), position = position_dodge(0.75), show.legend=FALSE)+
   theme(legend.position= "top")+
   scale_color_viridis_d(option = "inferno", begin = 0.2, end = 0.8)+
-  labs(x = " ", y = expression(TN ~ (mu*g / L)), color= "Month")+
-  ylim(0,2300)
-
+  labs(x = " ", y = expression(TN ~ (mu*g / L)), color= "")+
+    ylim(0, 2200)
 print(tn.anova.plot)
 
 ##$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$~~~~~~~~~~~~~~~~~~~~~~~~~~~~$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$##
 
-tp.anova.plot <- ggplot(ppp_nut_cleaned, aes(y = tp_ug, x = lakename, color =  month)) +
+tp.anova.plot <- ggplot(ppp_nut_cleaned, aes(y = tp_ug, x = month, color =  lakename)) +
   geom_boxplot()+
 stat_summary(geom = "text", fun.y = max, vjust = -1, size = 3.5,
-             label = c("bc", "bc", "bc", "c","bc","abc","ab","a","ab", "ab"), position = position_dodge(0.75))+
+             label = c("a", "b", "a", "b","a","b","a","b","a", "b"), position = position_dodge(0.75))+
   scale_color_viridis_d(option = "inferno", begin = 0.2, end = 0.8)+
   theme(legend.position = "none")+
-  labs(x = "Lake", y = expression(TP ~ (mu*g / L)))
+  labs(x = "Month", y = expression(TP ~ (mu*g / L)))+
+  ylim(0, 70)
 
 print(tp.anova.plot)
 
