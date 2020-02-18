@@ -26,11 +26,15 @@ The completed exercise is due on Tuesday, February 18 at 1:00 pm.
 
 2. Change the date column to a date format. Call up `head` of this column to verify.
 
+```{r "setup", include=FALSE}
+knitr::opts_knit$set(root.dir = 'C:/Users/krist/Box Sync/Spring 2020/R/Environmental_Data_Analytics_2020')
+library(tidyverse)
+getwd()
+```
 
 ```{r, message = FALSE}
 #1
-knitr::opts_knit$set(root.dir = 'C:/Users/krist/Box Sync/Spring 2020/R/Environmental_Data_Analytics_2020')
-getwd()
+
 library(tidyverse)
 library(cowplot)
 library(agricolae)
@@ -67,7 +71,7 @@ Peter Lake was manipulated with additions of nitrogen and phosphorus over the ye
 
 4. Which application of the GLM will you use (t-test, one-way ANOVA, two-way ANOVA with main effects, or two-way ANOVA with interaction effects)? Justify your choice.
 
-> Answer: 2 way anovas with interaction effects; there are multiple categories here - lakename and month, and there may be an interaction between month and nutrient concentrations.
+> Answer: 2 way anovas with interaction effects; there are multiple categories here - lakename and month, and there may be an interaction between month and lake.
 
 5. Run your test for TN. Include examination of groupings and consider interaction effects, if relevant.
 
@@ -90,9 +94,23 @@ bartlett.test(ppp_nut_cleaned$tn_ug ~ ppp_nut_cleaned$month)
 
 pp.tn.anova.2way <- aov(data = ppp_nut_cleaned, tn_ug ~ lakename * month)
 summary(pp.tn.anova.2way)
-#Month was not significant on its own and the interaction between month and lakename wasn't signficant either. There is a significant difference between Peter and Paul TN levels regardless of month monitored (XX. 
+#Month was not significant on its own and the interaction between month and lakename wasn't signficant either. There is a significant difference between Peter and Paul TN levels regardless of month monitored (Figure 1; ANOVA w interaction, F(1,187), p-value < 0.0001 for lakename; F(4, 187), p-value > 0.05 for month and lakename:month interaction). 
+
+tn.interaction <- with(ppp_nut_cleaned, interaction(lakename, month))
+pp.tn.anova.2way2 <- aov(data = ppp_nut_cleaned, tn_ug ~ tn.interaction)
+
+tn.groups <- HSD.test(pp.tn.anova.2way2, "tn.interaction", group = TRUE)
+tn.groups
+#The groupings here show that there's a lot of overap in significance between months and lakes - ie the letters bleed between Peter Lake and Paul lake designations. This is hard to articulate, but if the months made a significant impact on the lake TN values, you shouldn't see letters b and c occurring in both Peter Lake and Paul Lake. 
 
 #6
+shapiro.test(ppp_nut_cleaned$tp_ug[ppp_nut_cleaned$lakename == "Peter Lake"])
+shapiro.test(ppp_nut_cleaned$tp_ug[ppp_nut_cleaned$lakename == "Paul Lake"])
+shapiro.test(ppp_nut_cleaned$tp_ug[ppp_nut_cleaned$month == "5"])
+shapiro.test(ppp_nut_cleaned$tp_ug[ppp_nut_cleaned$month == "6"])
+#Both lakes are not normally distributed for TP, the months vary in whether their distributions are normally distributed. 
+
+qqnorm(ppp_nut_cleaned$tp_ug); qqline(ppp_nut_cleaned$tp_ug) #funky and super NOT normal distribution - right tailed
 
 bartlett.test(ppp_nut_cleaned$tp_ug ~ ppp_nut_cleaned$lakename)
 bartlett.test(ppp_nut_cleaned$tp_ug ~ ppp_nut_cleaned$month)
@@ -100,7 +118,14 @@ bartlett.test(ppp_nut_cleaned$tp_ug ~ ppp_nut_cleaned$month)
 
 pp.tp.anova.2way <- aov(data = ppp_nut_cleaned, tp_ug ~ lakename * month)
 summary(pp.tp.anova.2way)
-#Month was not significant on its own and the interaction between month and lakename wasn't signficant either - although the interaction was 'more' signficiant than that for TN. There is a significant difference between Peter and Paul TP levels regardless of month monitored (XX. 
+#Month was not significant on its own and the interaction between month and lakename wasn't signficant either - although the interaction was 'more' signficiant than that for TN. There is a significant difference between Peter and Paul TP levels regardless of month monitored (Figure 2; ANOVA w interaction, F(1,253), p-value < 0.0001 for lakename; F(4, 253), p-value > 0.05 for month and lakename:month interaction). 
+
+tp.interaction <- with(ppp_nut_cleaned, interaction(lakename, month))
+pp.tp.anova.2way2 <- aov(data = ppp_nut_cleaned, tp_ug ~ tp.interaction)
+
+tp.groups <- HSD.test(pp.tp.anova.2way2, "tp.interaction", group = TRUE)
+tp.groups
+#The groupings here are similar to those for TN. They show that there's a lot of overap in significance between months and lakes - ie the letters bleed between Peter Lake and Paul lake designations. Here, they're slightly more split between the lakes, with all a's occurring in Peter, and all but one c occuring in Paul. I'm wondering if this relates to the slightly more (still not) significant interaction effect for TP. 
 
 ```
 
@@ -110,10 +135,31 @@ summary(pp.tp.anova.2way)
 
 ```{r}
 #7
+tn.anova.plot <- ggplot(ppp_nut_cleaned, aes(y = tn_ug, x = lakename, color =  month)) +
+  geom_boxplot()+
+stat_summary(geom = "text", fun.y = max, vjust = -1, size = 3.5,
+             label = c("c", "c", "bc", "bc","c","abc","abc","ab","a", "abc"), position = position_dodge(0.75), show.legend=FALSE)+
+  theme(legend.position= "top")+
+  scale_color_viridis_d(option = "inferno", begin = 0.2, end = 0.8)+
+  labs(x = " ", y = expression(TN ~ (mu*g / L)), color= "Month")+
+  ylim(0,2300)
 
+print(tn.anova.plot)
+
+##$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$~~~~~~~~~~~~~~~~~~~~~~~~~~~~$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$##
+
+tp.anova.plot <- ggplot(ppp_nut_cleaned, aes(y = tp_ug, x = lakename, color =  month)) +
+  geom_boxplot()+
+stat_summary(geom = "text", fun.y = max, vjust = -1, size = 3.5,
+             label = c("bc", "bc", "bc", "c","bc","abc","ab","a","ab", "ab"), position = position_dodge(0.75))+
+  scale_color_viridis_d(option = "inferno", begin = 0.2, end = 0.8)+
+  theme(legend.position = "none")+
+  labs(x = "Lake", y = expression(TP ~ (mu*g / L)))
+
+print(tp.anova.plot)
 
 #8
-
+plot_grid(tn.anova.plot,tp.anova.plot, nrow=2, align = "v", rel_heights = c(1.25, 1))
 ```
 
 
