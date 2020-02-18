@@ -17,7 +17,7 @@ editor_options:
 ```{r, message = FALSE}
 getwd()
 library(tidyverse)
-options(scipen = 4)
+options(scipen = 4) #gets rid of e^- and prints full #
 
 PeterPaul.chem.nutrients <- read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
 
@@ -30,6 +30,7 @@ theme_set(mytheme)
 
 ## Linear Regression
 The linear regression, like the t-test and ANOVA, is a special case of the **generalized linear model** (GLM). A linear regression is comprised of a continuous response variable, plus a combination of 1+ continuous response variables (plus the error term). The deterministic portion of the equation describes the response variable as lying on a straight line, with an intercept and a slope term. The equation is thus a typical algebraic expression: 
+#HOW TO MAKE EQUATIONS IN SCRIPT
 $$ y = \alpha + \beta*x + \epsilon $$
 
 The goal for the linear regression is to find a **line of best fit**, which is the line drawn through the bivariate space that minimizes the total distance of points from the line. This is also called a "least squares" regression. The remainder of the variance not explained by the model is called the **residual error.** 
@@ -42,21 +43,28 @@ The linear regression will test the null hypotheses that
 Whether or not we care about the result of each of these tested hypotheses will depend on our research question. Sometimes, the test for the intercept will be of interest, and sometimes it will not.
 
 Important components of the linear regression are the correlation and the R-squared value. The **correlation** is a number between -1 and 1, describing the relationship between the variables. Correlations close to -1 represent strong negative correlations, correlations close to zero represent weak correlations, and correlations close to 1 represent strong positive correlations. The **R-squared value** is the correlation squared, becoming a number between 0 and 1. The R-squared value describes the percent of variance accounted for by the explanatory variables. 
+#R is the correlation; -1 is strong neg; 1 is strong pos
+#R squared removes the (-) component 
 
 ## Simple Linear Regression
 For the NTL-LTER dataset, can we predict irradiance (light level) from depth?
 ```{r}
 irradiance.regression <- lm(PeterPaul.chem.nutrients$irradianceWater ~ PeterPaul.chem.nutrients$depth)
-# another way to format the lm function
+# another way to format the lm function note you just call the dataframe once and then the columns. Preferred. 
 irradiance.regression <- lm(data = PeterPaul.chem.nutrients, irradianceWater ~ depth)
 summary(irradiance.regression)
+#results: p-value, beta, alpha, adjusted r-sq (31% of variance in irradiance is explained by depth), df 
 
-# Correlation
+# Correlation: TELLS YOU R and (+/-)
 cor.test(PeterPaul.chem.nutrients$irradianceWater, PeterPaul.chem.nutrients$depth)
+#note the comma, not ~; R = -.55 R2 = .309
+#
 ```
 Question: How would you report the results of this test (overall findings and report of statistical output)?
 
->  
+>  Irradiance decreases significantly with increasing depth (linear regression, R2 = 0.31, df= 14,449, p < 0.0001). 
+
+> For each 1m increase in depth, irradiance decreases by 95 units. 
 
 So, we see there is a significant negative correlation between irradiance and depth (lower light levels at greater depths), and that this model explains about 31 % of the total variance in irradiance. Let's visualize this relationship and the model itself. 
 
@@ -71,9 +79,13 @@ An exploratory option to visualize the model fit is to use the function `plot`. 
 4. **Residuals vs. Leverage.** This graph will display potential outliers. The values that fall outside the dashed red lines (Cook's distance) are outliers for the model. Watch for drastic departures of the solid red line from horizontal - this is a sign of a poor model fit.
 
 ```{r, fig.height = 3, fig.width = 4}
-par(mfrow = c(2,2), mar=c(1,1,1,1))
+par(mfrow = c(2,2), mar=c(1,1,1,1)) # mar allows you to print properly in knit
 plot(irradiance.regression)
-par(mfrow = c(1,1))
+par(mfrow = c(1,1)) #reset each time!! 
+#residual v fitted: clustering bad; outlier
+#Normal q-q : outlier prob
+#Scale-location: clustering again
+#Cooks: outlier
 ```
 
 The option best suited for communicating findings is to plot the explanatory and response variables as a scatterplot. 
@@ -82,18 +94,24 @@ The option best suited for communicating findings is to plot the explanatory and
 # Plot the regression
 irradiancebydepth <- 
   ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = irradianceWater)) +
-  #ylim(0, 2000) +
+  ylim(0, 2000) +
   geom_point() 
 print(irradiancebydepth) 
+#outlier: see that air irradiance is only 8000 so 25000 is not feasible. To remove it easily, set the ylim different.
+#exponential decay in scatter. 
+#consider logging to make it linear 
+#remove outlier 
+#you can't have zero values in logs; if there are only a few points, remove them or edit them to be non-zero. 
 ```
 
 Given the distribution of irradiance values, we don't have a linear relationship between x and y in this case. Let's try log-transforming the irradiance values.
 
 ```{r, fig.height = 3, fig.width = 4}
 PeterPaul.chem.nutrients <- filter(PeterPaul.chem.nutrients, 
-                                   irradianceWater != 0 & irradianceWater < 5000)
-irradiance.regression2 <- lm(data = PeterPaul.chem.nutrients, log(irradianceWater) ~ depth)
+                                   irradianceWater != 0 & irradianceWater < 5000) #remove the zeros and the outlier
+irradiance.regression2 <- lm(data = PeterPaul.chem.nutrients, log(irradianceWater) ~ depth) #log irradiance by depth. 
 summary(irradiance.regression2)
+#logging changes the adjusted R2 TO OVER 70%; only use ajusted R2 when there are large samples. 
 
 par(mfrow = c(2,2), mar=c(1,1,1,1))
 plot(irradiance.regression2)
@@ -102,10 +120,15 @@ par(mfrow = c(1,1))
 # Add a line and standard error for the linear regression
 irradiancebydepth2 <- 
   ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = irradianceWater)) +
-  geom_smooth(method = "lm") +
-  scale_y_log10() +
-  geom_point() 
+  #geom_smooth(method = "lm") + #two different variables compared with a line of best fit; includes the 95% but you can barely see it because it's so well fit. Only include the line without the CI if you're not going to talk about CI OF THE MODEL. 
+  geom_smooth(method = 'lm', se=FALSE, color = "black")+
+  scale_y_log10() + #instead of doing y = log(irradianceWater); shows the scale as log of actual irradiance values instead of logged values - much easier to read. 
+  geom_point(pch = 1, color = "blue")+ #designates the point type (hollow, color, etc)
+  labs( x = "Depth (m)", y = "Irradiance (unk units)") 
+          
 print(irradiancebydepth2) 
+
+#look up sentences to describe how to interpret logged values and results... 
 
 # SE can also be removed
 irradiancebydepth2 <- 
@@ -133,18 +156,16 @@ It is possible, and often useful, to consider multiple continuous explanatory va
 ``` {r, fig.height = 3, fig.width = 4}
 TPregression <- lm(data = subset(PeterPaul.chem.nutrients, lakename == "Paul Lake"), 
                    tp_ug ~ depth + dissolvedOxygen)
-summary(TPregression)
+summary(TPregression) # alpha = depth = 0 and do =0, beta1 = depth beta2 = do
+#results: even with df of 288, you can use adjusted R2 (29%); 
 
 TPplot <- ggplot(subset(PeterPaul.chem.nutrients, lakename == "Paul Lake"), 
                  aes(x = dissolvedOxygen, y = tp_ug, color = depth)) +
   geom_point() +
   xlim(0, 20)
-print(TPplot)
+print(TPplot) # not a good visual; hard to interpret 
 
-par(mfrow = c(2,2), mar=c(1,1,1,1))
-plot(TPregression)
-par(mfrow = c(1,1))
-
+#note the outliers and clustering; try transforming 
 ```
 
 ## Correlation Plots
@@ -153,12 +174,14 @@ We can also make exploratory plots of several continuous data points to determin
 ```{r, fig.height = 3, fig.width = 4}
 #install.packages("corrplot")
 library(corrplot)
+#test for multicollinearity 
+#problems with NAs
 PeterPaulnutrients <- 
   PeterPaul.chem.nutrients %>%
   select(tn_ug:po4) %>%
   na.omit()
-PeterPaulCorr <- cor(PeterPaulnutrients)
-corrplot(PeterPaulCorr, method = "ellipse")
+PeterPaulCorr <- cor(PeterPaulnutrients) #create a matrix 
+corrplot(PeterPaulCorr, method = "ellipse") #plot the matrix; stronger corr = line; weaker corr = circle, direction of elipse shows (+/-)
 corrplot.mixed(PeterPaulCorr, upper = "ellipse")
 ```
 
@@ -178,5 +201,7 @@ TPAIC <- lm(data = Paul.naomit, tp_ug ~ depth + dissolvedOxygen +
 step(TPAIC)
 TPmodel <- lm(data = Paul.naomit, tp_ug ~ dissolvedOxygen + temperature_C + tn_ug)
 summary(TPmodel)
+
+#AIC runs until it has <none> on top, then it runs the lm. Pull that lm and make it an object. Note that tn was not sig, but it helps the AIC value (max R2 and max DF). 
 
 ```
