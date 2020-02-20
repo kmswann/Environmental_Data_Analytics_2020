@@ -57,6 +57,14 @@ TNplot <- ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = tn_ug, color = lak
 print(TNplot)
 
 # Make the graph attractive
+TNplot <- ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = tn_ug, color = lakename)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE) +
+  xlim(0, 10)+
+  labs(x = "Depth (m)", y = expression(TN ~(mu*g/L)), color = "")+
+  #scale_color_brewer(palette = "Dark2")
+  scale_color_manual(values = c("darkblue", "lightblue"))
+print(TNplot)
 ```
 
 ## HIERARCHICAL MODELS
@@ -99,17 +107,24 @@ Next, we will build a hierarchical model. We will use the package `nlme` for our
 
 
 ```{r}
-TempTest.mixed <- lme(data = NTL.summertemp,
-                     temperature_C ~ year4, 
-                     random = ~1|lakename)
+#what the hell are random effects??
+TempTest.mixed <- lme(data = NTL.summertemp, #lme is linear mixed effects
+                     temperature_C ~ year4, #temp by year (main effect)
+                     random = ~1|lakename) #random variable is 1 grouped by lakename the 1 is just a substitute for what would otherwise be called out as 'time'. 
 summary(TempTest.mixed)
 rsquared(TempTest.mixed)
 
+# Results: random effect will hopefully make your r2  better in your model... 
+#Marginal r2 = fixed effect only, conditional r2 = random effect included
+
+#random effects have to be categorical 
+
 # Compare the random effects model with the fixed effects model
-TempTest.fixed <- gls(data = NTL.summertemp,
+TempTest.fixed <- gls(data = NTL.summertemp, #use gls for different output 
                       temperature_C ~ year4)
 summary(TempTest.fixed)
 
+#run anova on the rem vs fem 
 anova(TempTest.mixed, TempTest.fixed)
 # The lower the AIC, the better.
 # The p-value tells us whether those models have a significantly different fit
@@ -118,13 +133,27 @@ NTL.tempmodel <-
 ggplot(NTL.summertemp, aes(x = year4, y = temperature_C, color = lakename)) +
   geom_point() +
   scale_color_viridis_d() +
-  geom_abline(intercept = -97.72, slope = 0.06) +
+  geom_abline(intercept = -97.72, slope = 0.06) + #from mixed effect output
   # make it look better
   labs(x = "", y = expression("Temperature " ( degree~C)), color = "") +
-  theme(legend.spacing.x = unit(0, "cm"))
+  theme(legend.spacing.x = unit(0, "cm")) #makes labels closer together.
 print(NTL.tempmodel)
+
+#shows fixed effects best fit line vs the radom effect best fit line
+NTL.tempmodel2 <-
+ggplot(NTL.summertemp, aes(x = year4, y = temperature_C)) +
+  geom_point(aes(color = lakename)) +
+  geom_smooth(method = "lm", se = FALSE)+ #fixed effects model
+  scale_color_viridis_d() +
+  geom_abline(intercept = -97.72, slope = 0.06) + #from mixed effect output
+  # make it look better
+  labs(x = "", y = expression("Temperature " ( degree~C)), color = "") +
+  theme(legend.spacing.x = unit(0, "cm")) #makes labels closer together.
+print(NTL.tempmodel2)
 ```
 
 Question: How would you interpret the collective results of your mixed effects model in the context of the study question?
 
-> ANSWER: 
+> ANSWER: For each year, there is a 0.06 degree change in temp, over time this is substantial! Note that the slope of 0.06 is significant in the model...
+
+
