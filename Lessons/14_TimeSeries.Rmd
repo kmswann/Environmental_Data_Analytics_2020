@@ -19,9 +19,9 @@ editor_options:
 getwd()
 library(tidyverse)
 library(lubridate)
-#install.packages("trend")
+install.packages("trend")
 library(trend)
-#install.packages("zoo")
+install.packages("zoo")
 library(zoo)
 
 # Set theme
@@ -102,7 +102,7 @@ We first need to turn the discharge data into a time series object in R. This is
 Note: time series objects must be equispaced. In our case, we have daily data with no NAs in the data frame, so we don't need to worry about this. We will cover how to address data that are not equispaced later in the lesson.
 
 ```{r}
-EnoDischarge.late_ts <- ts(EnoDischarge.late[[8]], frequency = 365)
+EnoDischarge.late_ts <- ts(EnoDischarge.late[[8]], frequency = 365) #8th column of dataset (discharge_mean)
 ```
 
 The `stl` function decomposes the time series object into its component parts. We must specify that the window for seasonal extraction is either "periodic" or a specific number of at least 7. The decomposition proceeds through a loess (locally estimated scatterplot smoothing) function.
@@ -114,16 +114,18 @@ EnoDischarge.late_Decomposed <- stl(EnoDischarge.late_ts, s.window = "periodic")
 
 # Visualize the decomposed series. 
 plot(EnoDischarge.late_Decomposed)
+#Not a strong seasonal trend; 365 day repeat, 35 years, each year is exactly the same, if it was a strong trend, the repeat would look less noisy and the scale would be much larger, how often do trends repeat? Not actually seasonal...just about cycles...
+
 
 # We can extract the components and turn them into data frames
-EnoDischarge.late_Components <- as.data.frame(EnoDischarge.late_Decomposed$time.series[,1:3])
+EnoDischarge.late_Components <- as.data.frame(EnoDischarge.late_Decomposed$time.series[,1:3]) #all rows, columns 1:3 
 EnoDischarge.late_Components <- mutate(EnoDischarge.late_Components,
                       Observed = EnoDischarge.late$discharge.mean,     
                       Date = EnoDischarge.late$datetime)
 
 # Visualize how the trend maps onto the data
 ggplot(EnoDischarge.late_Components) +
-  geom_line(aes(y = Observed, x = Date),  size = 0.25) +
+  geom_line(aes(y = Observed, x = Date),  size = 1) +
   geom_line(aes(y = trend, x = Date), color = "#c13d75ff") +
   geom_hline(yintercept = 0, lty = 2) +
   ylab(expression("Discharge (ft"^3*"/s)"))
@@ -134,7 +136,7 @@ ggplot(EnoDischarge.late_Components) +
   geom_line(aes(y = seasonal, x = Date), color = "#c13d75ff") +
   geom_hline(yintercept = 0, lty = 2) +
   ylab(expression("Discharge (ft"^3*"/s)"))
-
+#Dips below zero every year. 
 ```
 
 Note that the decomposition can yield negative values when we apply a seasonal adjustment or a trend adjustment to the data. The decomposition is not constrained by a lower bound of zero as discharge is in real life. Make sure to interpret with caution!
@@ -143,6 +145,9 @@ Note that the decomposition can yield negative values when we apply a seasonal a
 ## Trend analysis
 
 Two types of trends may be present in our time series dataset: **monotonic** or **step**. Monotonic trends are a gradual shift over time that is consistent in direction, for example in response to land use change. Step trends are a distinct shift at a given time point, for example in response to a policy being enacted. 
+
+Monotonic example: climate change
+Step trend example: policy change
 
 ### Step trend analysis
 
@@ -159,20 +164,29 @@ Note: ALWAYS look into the assumptions of a given test to ensure it matches with
 Let's say we wanted to know whether discharge was higher in the early period or the late period. Perhaps there was a change in the methodology of streamflow measurement between the two periods that caused a differene in the magnitude of measured discharge?
 
 ```{r}
-EnoDischarge.early.subsample <- sample_n(EnoDischarge.early, 5000)
+EnoDischarge.early.subsample <- sample_n(EnoDischarge.early, 5000) #5000 random samples
 EnoDischarge.late.subsample <- sample_n(EnoDischarge.late, 5000)
+
 
 shapiro.test(EnoDischarge.early.subsample$discharge.mean)
 shapiro.test(EnoDischarge.late.subsample$discharge.mean)
+#P is sig, not normal distribution - no ttest allowed
 
 var.test(EnoDischarge.early$discharge.mean, EnoDischarge.late$discharge.mean)
+#p-value sig, totally unequal variance between the samples - no t-test allowed
 
 wilcox.test(EnoDischarge.early$discharge.mean, EnoDischarge.late$discharge.mean)
+#non-parametric: two are significantly different, p-value sig. 
+
+summary(EnoDischarge.early$discharge.mean)
+summary(EnoDischarge.late$discharge.mean)
 ```
 
 How might you interpret the results of this test, and how might you represent them graphically?
 
->
+> Means and medians are sign different as shown by wilcox test (wILCOXON TEST, w = 1.17*10^8, P<0.0001). 
+Show boxplot, violin plot, density plot of data, but will be hard to graph together bc you separated them... 
+Note that time is not an explanatory variable here. Instead it's just comparing two periods. 
 
 ### Monotonic trend analysis
 

@@ -1,6 +1,6 @@
 ---
 title: "Assignment 7: GLMs week 2 (Linear Regression and beyond)"
-author: "Student Name"
+author: "Kristine Swann"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -25,11 +25,38 @@ The completed exercise is due on Tuesday, February 25 at 1:00 pm.
 
 2. Build a ggplot theme and set it as your default theme.
 
-```{r}
-#1
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, eval=TRUE)
+```
 
+```{r SettingSession, include=FALSE}
+#-------------------------------------------------------------------------------------------------
+#1: Loading Packages
+pkgs = c(
+  "tidyverse",
+  "nlme",
+  "piecewiseSEM"
+)
+i = pkgs[!pkgs %in% installed.packages()]
+if(length(i) > 0)
+  install.packages(i)
+lapply(pkgs, library, character.only = TRUE)
+
+```
+
+```{r LoadingData}
+#-----------------------------------------------------------------------------------
+#1
+getwd()
+cpraw <- read.csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
+litter <- read.csv("./Data/Processed/NEON_NIWO_Litter_mass_trap_Processed.csv")
 
 #2
+blahtheme <- theme_classic(base_size = 14) +
+  theme(axis.text = element_text(color = "darkblue"), axis.ticks = element_line(colour = 'darkseagreen4', size = 2, linetype = 'dashed'), axis.ticks.length = unit(1, "cm"),
+        legend.position = "bottom")
+  
+theme_set(blahtheme)       
 
 ```
 
