@@ -44,8 +44,8 @@ lapply(pkgs, library, character.only = TRUE)
 
 ```
 
-```{r LoadingData}
-#-----------------------------------------------------------------------------------
+```{r, message = FALSE}
+
 #1
 getwd()
 cpraw <- read.csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
@@ -72,7 +72,7 @@ Research question: What is the best set of predictors for lake temperatures in J
 
 4. Run an AIC to determine what set of explanatory variables (year4, daynum, depth) is best suited to predict temperature. Run a multiple regression on the recommended set of variables. 
 
-```{r}
+```{r, message = FALSE}
 #3
 cp <- 
   cpraw %>%
@@ -95,7 +95,7 @@ summary(cpmodel)
 
 6. Run an interaction effects ANCOVA to predict temperature based on depth and lakename from the same wrangled dataset.
 
-```{r}
+```{r, message = FALSE}
 #6
 cpancova.interaction <- lm(data = cp, temperature_C ~ lakename * depth)
 summary(cpancova.interaction)
@@ -107,7 +107,7 @@ summary(cpancova.interaction)
 
 8. Create a graph that depicts temperature by depth, with a separate color for each lake. Add a geom_smooth (method = "lm", se = FALSE) for each lake. Make your points 50 % transparent. Adjust your y axis limits to go from 0 to 35 degrees. Clean up your graph to make it pretty. 
 
-```{r}
+```{r, message = FALSE}
 #8
 cpplot <- ggplot(cp, aes(x = depth, y = temperature_C, color = lakename)) + 
   geom_point() + 
@@ -124,7 +124,7 @@ print(cpplot)
 a. Build and run a mixed effects model.
 b. Check the difference between the marginal and conditional R2 of the model. 
 
-```{r}
+```{r, message = FALSE}
 #a
 litter.mixed <- lme(data = litter,
                      dryMass ~ nlcdClass*functionalGroup, 
@@ -141,7 +141,7 @@ b. continued... How much more variance is explained by adding the random effect 
 
 c. Run the same model without the random effect.
 d. Run an anova on the two tests. 
-```{r}
+```{r, message = FALSE}
 #c) 
 litter.fixed <- gls(data = litter,
                      dryMass ~ nlcdClass*functionalGroup) 
