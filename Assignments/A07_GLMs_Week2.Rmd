@@ -129,7 +129,7 @@ b. Check the difference between the marginal and conditional R2 of the model.
 litter.mixed <- lme(data = litter,
                      dryMass ~ nlcdClass*functionalGroup, 
                      random = ~1|plotID) 
-summary(litter.mixed)
+
 #b)
 rsquared(litter.mixed)
 
@@ -145,7 +145,7 @@ d. Run an anova on the two tests.
 #c) 
 litter.fixed <- gls(data = litter,
                      dryMass ~ nlcdClass*functionalGroup) 
-summary(litter.fixed)
+
 rsquared(litter.fixed)
 
 #d)
