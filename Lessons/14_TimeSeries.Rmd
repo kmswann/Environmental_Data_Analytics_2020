@@ -194,11 +194,11 @@ In general, detecting a monotonic trend requires a long sequence of data with fe
 
 Adjusting the data may be necessary to fulfill the assumptions of a trend test. These adjustments include **aggregation**, **subsampling**, and **interpolation**. What do each of these mean, and why might we want to use them?
 
-> aggregation: 
+> aggregation: month to year
 
-> subsampling: 
+> subsampling: year to month, etc
 
-> interpolation: 
+> interpolation: filling in data gaps 
 
 Common interpolation methods: 
 
@@ -251,6 +251,7 @@ print(GaringerOzone.interpolated)
 Specific tests for monotonic trend analysis are listed below, with assumptions and tips: 
 
 * **linear regression**: no seasonality, fits the assumptions of a parametric test. Function: `lm`
+Temporal autocorrelation: samples next to each other in time will autocorrelate - today's weather impacts tomorrow's weather, etc. 
 * **Mann-Kendall**: no seasonality, non-parametric, no temporal autocorrelation, missing data allowed. Function: `mk.test` (package: trend)
 * **modified Mann-Kendall**: no seasonality, non-parametric, accounts for temporal autocorrelation, missing data allowed. Function: `mmky` and `mmkh` (package: modifiedmk)
 * **Seasonal Mann-Kendall**: seasonality, non-parametric, no temporal autocorelation, identical distribution. Function: `smk.test` (package: trend)
@@ -273,21 +274,26 @@ EnoDischarge.late.monthly <- EnoDischarge.late %>%
          Month = month(datetime)) %>%
   group_by(Year, Month) %>%
   summarise(Discharge = mean(discharge.mean)) 
+#mean better than median for discharge bc it pulls outlyer data into it. 
+#months don't have even # of days, so you have to be careful if you aggregate instead of subsample...
   
 EnoDischarge.late.monthly$Date <- as.Date(paste(EnoDischarge.late.monthly$Year, 
                                                 EnoDischarge.late.monthly$Month, 
                                                 1, sep="-"), 
                                           format = "%Y-%m-%d")
+#You have to format the data as a date, so you do it with this hacky code with a "1" and a 1 in order to set the 1st day of the month for each month... in hw... 
 
 # Generate time series (smk.test needs ts, not data.frame)
 EnoDischarge.late.monthly.ts <- ts(EnoDischarge.late.monthly$Discharge, frequency = 12, 
                         start = c(1985, 10, 1), end = c(2019, 12, 1))
 # Run SMK test
 EnoDischarge.late.trend <- smk.test(EnoDischarge.late.monthly.ts)
+#no monotonic trend, the p-value is high 
 
 # Inspect results
 EnoDischarge.late.trend
 summary(EnoDischarge.late.trend)
+#no monotonic trend, the p-value is high
 
 EnoDischarge.monthly <-
 ggplot(EnoDischarge.late.monthly, aes(x = Date, y = Discharge)) +
@@ -298,7 +304,7 @@ print(EnoDischarge.monthly)
 
 What would we conclude based on these findings? 
 
->
+> Discharge is not following a seasonal monotonic trend from 1985-2019 (. 
  
 If a significant trend was present, we could compute a **Sen's Slope** to quantify that trend (`sens.slope` function in the trend package).
 
