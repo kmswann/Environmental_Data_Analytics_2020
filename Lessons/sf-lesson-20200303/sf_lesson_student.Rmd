@@ -61,7 +61,8 @@ pdf(here("outputs", "pdf_test.pdf"), width = 11, height = 8.5)
 ggplot(data = cars) +
   geom_point(aes(x = dist, y = speed))
 dev.off()
-# it's ok to get a "null device" warning here
+# way to check to make sure pdf is saving to outputs folder. 
+# 
 ```
 
 Look in your your outputs folder. You should have a file called "pdf_test.pdf" that you can open up and looks ok. If not, you'll need to ask for help.
@@ -205,6 +206,8 @@ There are two main ways to define a CRS in sf:
 1. proj4 string - a character string with CRS info
 2. EPSG code - a standard numeric code that defines a projection type
 
+[SET BOTH to be safe]
+
 As long as one of these is defined, you can move on. However, if you want to define both, that might prove less confusing to your future-self. :)
 
 #### 1.7.3 Coordinate Systems Websites
@@ -220,6 +223,7 @@ Most provide one or more of the following:
 Some suggested websites:
 
 1. [https://epsg.io/](http://www.epsg-registry.org/) - open source nicer user interface to access data in the EPSG registry, includes a little transformation calculator too! and proj4 string generator, this is my go-to CRS look-up database
+[Go to website, enter in your projection (or search for it), then copy the 'description' section...more useful to grab EPSG code if you can find it.]
 2. [https://spatialreference.org/ref/epsg/](https://spatialreference.org/ref/epsg/)
 3. [http://www.epsg-registry.org/](http://www.epsg-registry.org/) - official database, but ugly slow interface
 
@@ -265,6 +269,7 @@ Start by reading in the basin boundaries for non-reference (i.e., notable human 
 ```{r read.in.some.data}
 basins_nf_seplains_raw <- st_read(here("data", "spatial_data", "bas_nonref_SEPlains.shp"))
 # note how I'm using the here package!
+#st_read reads shp
 ```
 
 **Activity**
@@ -279,9 +284,9 @@ I like to always save a copy of the raw data in my R session and rename all new 
 
 ```{r activity.load.data}
 # add your code here
-gages_raw <- 
-southeast_state_bounds_raw <- 
-my_tabular_data_raw <- 
+gages_raw <- st_read(here("data", "spatial_data","gagesII_9322_sept30_2011.shp"))
+southeast_state_bounds_raw <- st_read(here("data", "spatial_data","southeast_state_bounds.shp"))
+my_tabular_data_raw <- read.csv(here("data", "tabular_data", "conterm_basinid.txt")) #can also try read.table
 
 # red warning text is telling you how the data is being parsed
 ```
@@ -294,7 +299,8 @@ Now that you've loaded in these data, take a look at their format, information i
 
 Use base R commands to answer the following questions (for basins_nf_seplains_raw):
 
-1. What is the class?
+1. What is the class? 
+
 2. What are the names of each column?
 3. How many columns are there?
 4. What are the attributes?
@@ -304,6 +310,11 @@ Use base R commands to answer the following questions (for basins_nf_seplains_ra
 ```{r activity.check.out.data}
 
 # add your code here
+class(basins_nf_seplains_raw)
+names(basins_nf_seplains_raw)
+attributes(basins_nf_seplains_raw)
+head(basins_nf_seplains_raw) #prints first several lines
+
 
 # bonus, add your code here
 ```
@@ -325,6 +336,9 @@ Use st_crs() to look at the CRSs of the spatial data you have loaded up so far. 
 
 ```{r activity.check.out.data.again}
 # add your code here
+st_crs(basins_nf_seplains_raw)
+st_crs(gages_raw)
+st_crs(southeast_state_bounds_raw)
 
 # first two will not have EPSG code but have proj4 string (i.e., "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
 
@@ -371,12 +385,20 @@ Last, check the CRSs of each.
 ```{r activity.setting.projecting}
 # define proj4 string and EPSG code
 # add your code here
-my_proj4 <- 
-my_epsg <- 
+my_proj4 <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+my_epsg <- 5070
 
 # setting projections
-# set the proj4 string first and then set the EPSG code (because proj4 will over-ride EPSG if you set EPSG first)
-# add your code here
+st_crs(basins_nf_seplains_raw) <- my_proj4
+st_crs(basins_nf_seplains_raw) <- my_epsg
+st_crs(gages_raw) <- my_proj4
+st_crs(gages_raw) <- my_epsg
+st_crs(southeast_state_bounds_raw) <- my_proj4
+st_crs(southeast_state_bounds_raw) <- my_epsg
+
+
+# set the proj4 string first and then set the EPSG code (because proj4 will over-ride EPSG if you set EPSG first)!!!!!!!!
+
 # basins
 basins_nf_seplains <- basins_nf_seplains_raw
 
@@ -441,6 +463,7 @@ gages_tabular_as_sf <- st_as_sf(gages_tabular, coords = c("LNG_GAGE", "LAT_GAGE"
 class(gages_tabular_as_sf)
 head(gages_tabular_as_sf)
 st_crs(gages_tabular_as_sf)
+#note that latitude and long has been replaced with geometry...
 # we'll need to change that if we want to use it with state bounds and watershed boundaries
 
 # check by plotting (more on plotting below)
@@ -527,7 +550,10 @@ Bonus: What are some other spatial operations (or confirmations) that you could 
 ```{r activity.gages.select}
 # select a state, here I'm choosing North Carolina (NC)
 # add your code here
-
+NC <- southeast_state_bounds %>%
+  select(southeast_state_bounds$NAME == North Carolina)%>%
+st_drop_geometry(NC)
+  select(southeast_state_bounds_geometry)
 # check
 # add your code here
 
