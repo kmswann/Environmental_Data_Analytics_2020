@@ -702,15 +702,27 @@ Can you reproduce Figure 1b?
 ```{r activity.reproducing.figure1b}
 # select NC
 # add your code here
+nc_basemap <- get_map(nc_bbox_fix, maptype = 'terrain-background', source = 'stamen', zoom = 8)
+class(nc_basemap)
+st_crs(nc_basemap)
 
+nc_state_bounds_geom <- southeast_state_bounds %>%
+  filter(NAME == "North Carolina")%>%
+  st_geometry()
+nc_state_bounds_geom_wsg84 <- nc_state_bounds_geom %>%
+  st_transform(4326)
 
 # make figure 1b
+##################################################################################
 # find watersheds that overlap with NC (want the whole watershed, not just the part of the watershe that's inside the NC bounds)
 # add your code here
-
+regional_basins_nf_seplains <- basins_nf_seplains %>%
+  st_overlaps(nc_state_bounds_geom)%>%
+  st_transform(4326)
 
 # look at result
 # add your code here
+head(regional_basins_nf_seplains)
 # shows first 6 results list of integers where 0 = false and 1 = true
 # still is an sf object but is different than what we're used to
 
@@ -737,6 +749,11 @@ Can you reproduce Figure 1b?
 
 # select Southeast gages only
 # add your code here
+regional_gages <- gages %>%
+  st_overlaps(regional_basins_nf_seplains)%>%
+  st_transform(4326)
+
+
 # stretch break...this might take a while to run
 
 # use nc_basins_overlap_sel to find gages inside
@@ -750,7 +767,13 @@ Can you reproduce Figure 1b?
 
 # plot figure 1b
 # add your code here
-
+pdf(here("outputs", "1b"), width = 11, height = 8.5)
+ggmap(nc_basemap)+
+  geom_sf(data = nc_state_bounds_geom_wsg84, fill = NA, lwd = 1, inherit.aes = FALSE)+
+  geom_sf(data = regional_basins_nf_seplains, alpha = 0.25)+
+  geom_sf(data = regional_gages, lwd=1)+
+  theme_bw()
+dev.off()
 ```
 
 ### 3.3 Mixing Spatial and Tabular Data
