@@ -281,7 +281,11 @@ I like to always save a copy of the raw data in my R session and rename all new 
 # add your code here
 gages_raw <- st_read(here("data", "spatial_data", "gagesII_9322_sept30_2011.shp"))
 southeast_state_bounds_raw <- st_read(here("data", "spatial_data", "southeast_state_bounds.shp"))
+NC_HUC8 <- st_read(here("data", "spatial_data", "A09", "8Digit_HUC_Subbasins.shp" ))
 my_tabular_data_raw <- read_csv(here("data", "tabular_data", "conterm_climate.txt")) # I'm choosing climate data here
+my_tabular_data_raw1 <- read_csv(here("data", "tabular_data", "conterm_topo.txt"))
+
+my_tabular_data_raw2 <- read_csv(here("data", "tabular_data", "conterm_hydro.txt"))
 
 # red warning text is telling you how the data is being parsed
 ```
@@ -652,7 +656,7 @@ nc_state_bounds_geom <- southeast_state_bounds %>%
 
 # get data bounding box
 nc_bbox <- nc_state_bounds_geom %>%
-  st_buffer(dist = 150000) %>% # this value is very arbitrary just wanting to make a large buffer around geometry
+  st_buffer(dist = 50000) %>% # this value is very arbitrary just wanting to make a large buffer around geometry
   st_transform(4326) %>% # WGS84 (for lat and long)
   st_bbox()
 nc_bbox # check
@@ -664,7 +668,7 @@ nc_bbox_fix <- c(left = nc_bbox[[1]], bottom = nc_bbox[[2]], right = nc_bbox[[3]
 nc_bbox_fix
 
 # get basemap
-nc_basemap <- get_map(nc_bbox_fix, maptype = 'terrain-background', source = 'stamen', zoom = 8)
+nc_basemap <- get_map(nc_bbox_fix, maptype = "watercolor", source = "stamen", zoom = 8)
 class(nc_basemap)
 st_crs(nc_basemap)
 # you'll have to trust me that this will have a CRS = WGS84
@@ -702,9 +706,6 @@ Can you reproduce Figure 1b?
 ```{r activity.reproducing.figure1b}
 # select NC
 # add your code here
-nc_basemap <- get_map(nc_bbox_fix, maptype = 'terrain-background', source = 'stamen', zoom = 8)
-class(nc_basemap)
-st_crs(nc_basemap)
 
 nc_state_bounds_geom <- southeast_state_bounds %>%
   filter(NAME == "North Carolina")%>%
@@ -783,9 +784,13 @@ The sf and tidyverse packages work together very well to wrangle spatial and tab
 Let's try an example. Here we'll select all the gages in NC, join them with one of the GAGES-II tabular datasets, and create a map that colors these gage locations by a particular variable in the tabular dataset. We might want to do this as the start of spatial trend analysis.
 
 ```{r joining.gage.data}
-# Use the NC state boundary we used earlier to select all the stream gages in NC
+# A09
+
+nc_basemap <- get_map(nc_bbox_fix, maptype = "watercolor", source = "stamen", zoom = 8)
+
 nc_gages <- gages %>%
-  st_intersection(nc_state_bounds_geom)
+  st_intersection(nc_state_bounds_geom)%>%
+  st_transform(4326)
 
 # take a look at ng_gages
 head(nc_gages)
@@ -793,7 +798,7 @@ names(nc_gages)
 # we see there are some variables we could color by but the tabular data has many more
 
 # take a look at my_tabular_data_raw
-names(my_tabular_data_raw)
+names(my_tabular_data_raw1)
 # In this example, we choose the climate data and use the WD_SITE variable. This is the "Site average of annual number of days (days) of measurable precipitation, derived from 30 years of record (1961-1990), 2km PRISM.". This description comes from the gagesII_sept30_2011_var_desc.xlsx file in the tabular data directory.
 
 # check column names of nc_gages to look for joining key
@@ -801,20 +806,23 @@ names(nc_gages)
 # use "STAID"
 
 # join the tabular data to nc_gages
-nc_gages_climate <- nc_gages %>%
-  left_join(my_tabular_data_raw, by = "STAID")
+nc_gages_topo <- nc_gages %>%
+  left_join(my_tabular_data_raw1, by = "STAID")
 
+HUC <- NC_HUC8%>%
+  st_transform(4326)
 # check that it worked
-names(nc_gages_climate)
+names(nc_gages_topo)
 # looks good!
 
 # plot WD_SITE for each gage location
-pdf(here("outputs", "nc_gages_by_tabular_data.pdf"), width = 11, height = 8.5)
-ggplot() +
-  geom_sf(data = nc_gages_climate, aes(color = WD_SITE), size = 3) +
-  scale_color_gradient(low = "white", high = "blue") +
-  labs(color = "Gage Avg. Annual # Days with Precipitation") +
-  geom_sf(data = nc_state_bounds_geom, fill = NA) +
+pdf(here("outputs", "nc_gages_by_tabular_data1.pdf"), width = 11, height = 8.5)
+ggmap(nc_basemap) +
+  geom_sf(data = HUC, alpha = 0.25, inherit.aes=FALSE)+
+  geom_sf(data = nc_gages_topo, inherit.aes=FALSE, aes(color = ELEV_STD_M_BASIN), size = 3) +
+  scale_color_gradient(low = "grey", high = "red") +
+  labs(title = "Gnarly Whitewater", color = "Stand. dev. of elev. across sub-watersheds") +
+  geom_sf(data = nc_state_bounds_geom, fill = NA, inherit.aes=FALSE) +
   theme_bw()
 dev.off()
 ```

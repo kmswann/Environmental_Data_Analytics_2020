@@ -1,0 +1,77 @@
+---
+title: "A09"
+author: "Kristine Swann"
+date: "3/7/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load.libraries, error=FALSE, message=FALSE, warning=FALSE}
+# some tidyverse packages
+library("readr")
+library("dplyr")
+library("tidyr")
+library("ggplot2")
+library("purrr")
+# some spatial data packages
+library("sf")
+library("ggmap")
+# some other packages
+library("here")
+```
+
+```{r activity.load.data}
+gages_raw <- st_read(here("data", "spatial_data", "gagesII_9322_sept30_2011.shp"))
+southeast_state_bounds_raw <- st_read(here("data", "spatial_data", "southeast_state_bounds.shp"))
+NC_HUC8 <- st_read(here("data", "spatial_data", "A09", "8Digit_HUC_Subbasins.shp" ))
+my_tabular_data_raw <- read_csv(here("data", "tabular_data", "conterm_climate.txt")) # I'm choosing climate data here
+my_tabular_data_raw1 <- read_csv(here("data", "tabular_data", "conterm_topo.txt"))
+
+my_tabular_data_raw2 <- read_csv(here("data", "tabular_data", "conterm_hydro.txt"))
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+```{r joining.gage.data}
+# A09
+
+nc_basemap <- get_map(nc_bbox_fix, maptype = "watercolor", source = "stamen", zoom = 8)
+
+nc_gages <- gages %>%
+  st_intersection(nc_state_bounds_geom)%>%
+  st_transform(4326)
+
+
+# join the tabular data to nc_gages
+nc_gages_topo <- nc_gages %>%
+  left_join(my_tabular_data_raw1, by = "STAID")
+
+HUC <- NC_HUC8%>%
+  st_transform(4326)
+names(nc_gages_topo)
+
+nc_state_bounds_geom <- southeast_state_bounds %>%
+  filter(NAME == "North Carolina") %>%
+  st_geometry()%>%
+   st_transform(4326)
+
+# plot WD_SITE for each gage location
+pdf(here("outputs", "nc_gages_by_tabular_data1.pdf"), width = 11, height = 8.5)
+ggmap(nc_basemap) +
+  geom_sf(data = HUC, alpha = 0.25, inherit.aes=FALSE)+
+  geom_sf(data = nc_gages_topo, inherit.aes=FALSE, aes(color = ELEV_STD_M_BASIN), size = 3) +
+  scale_color_gradient(low = "grey", high = "red") +
+  labs(title = "Gnarly Whitewater", color = "Stand. dev. of elev. across sub-watersheds") +
+  geom_sf(data = nc_state_bounds_geom, fill = NA, inherit.aes=FALSE) +
+  theme_bw()
+dev.off()
+```
+
