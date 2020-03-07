@@ -32,44 +32,68 @@ my_tabular_data_raw1 <- read_csv(here("data", "tabular_data", "conterm_topo.txt"
 
 my_tabular_data_raw2 <- read_csv(here("data", "tabular_data", "conterm_hydro.txt"))
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
 ```
 
 ```{r joining.gage.data}
 # A09
+my_proj4 <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+my_epsg <- 4326
+
+
+#gage bounds
+gages <- gages_raw
+st_crs(gages) <- my_proj4
+gages <- gages %>%
+  st_set_crs(my_epsg)
+st_crs(gages)
+
+
+#HUC bounds
+HUC<-NC_HUC8
+st_crs(HUC) <- my_proj4
+HUC <- HUC %>%
+  st_set_crs(my_epsg)
+st_crs
+
+
+# state bounds
+
+southeast_state_bounds <- southeast_state_bounds_raw
+st_crs(southeast_state_bounds) <- my_proj4
+southeast_state_bounds <- southeast_state_bounds %>%
+  st_set_crs(my_epsg)
+st_crs(southeast_state_bounds)
+
+nc_state_bounds_geom <- southeast_state_bounds %>%
+  filter(NAME == "North Carolina") %>%
+  st_geometry()
+head(nc_state_bounds_geom)
+nc_bbox <- nc_state_bounds_geom %>%
+  st_buffer(dist = 50000) %>% # this value is very arbitrary just wanting to make a large buffer around geometry
+  st_bbox()
+nc_bbox
+
+nc_bbox_fix <- c(left = nc_bbox[[1]], bottom = nc_bbox[[2]], right = nc_bbox[[3]], top = nc_bbox[[4]])
+nc_bbox_fix
 
 nc_basemap <- get_map(nc_bbox_fix, maptype = "watercolor", source = "stamen", zoom = 8)
 
 nc_gages <- gages %>%
-  st_intersection(nc_state_bounds_geom)%>%
-  st_transform(4326)
+  st_intersection(nc_state_bounds_geom)
 
 
 # join the tabular data to nc_gages
 nc_gages_topo <- nc_gages %>%
   left_join(my_tabular_data_raw1, by = "STAID")
 
-HUC <- NC_HUC8%>%
-  st_transform(4326)
-names(nc_gages_topo)
-
-nc_state_bounds_geom <- southeast_state_bounds %>%
-  filter(NAME == "North Carolina") %>%
-  st_geometry()%>%
-   st_transform(4326)
 
 # plot WD_SITE for each gage location
 pdf(here("outputs", "nc_gages_by_tabular_data1.pdf"), width = 11, height = 8.5)
 ggmap(nc_basemap) +
   geom_sf(data = HUC, alpha = 0.25, inherit.aes=FALSE)+
-  geom_sf(data = nc_gages_topo, inherit.aes=FALSE, aes(color = ELEV_STD_M_BASIN), size = 3) +
+  geom_sf(data = nc_gages_topo, alpha = 0.25, inherit.aes=FALSE, aes(color = ELEV_STD_M_BASIN), size = 3) +
   scale_color_gradient(low = "grey", high = "red") +
-  labs(title = "Gnarly Whitewater", color = "Stand. dev. of elev. across sub-watersheds") +
+  labs(title = "Gnarly Whitewater in North Carolina", x = Longitude, y = Latitude, color = "Stand. dev. of elev. across sub-watersheds") +
   geom_sf(data = nc_state_bounds_geom, fill = NA, inherit.aes=FALSE) +
   theme_bw()
 dev.off()

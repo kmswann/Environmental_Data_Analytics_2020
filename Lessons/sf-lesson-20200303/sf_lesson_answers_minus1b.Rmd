@@ -821,7 +821,7 @@ ggmap(nc_basemap) +
   geom_sf(data = HUC, alpha = 0.25, inherit.aes=FALSE)+
   geom_sf(data = nc_gages_topo, inherit.aes=FALSE, aes(color = ELEV_STD_M_BASIN), size = 3) +
   scale_color_gradient(low = "grey", high = "red") +
-  labs(title = "Gnarly Whitewater", color = "Stand. dev. of elev. across sub-watersheds") +
+  labs(title = "Gnarly Whitewater in North Carolina", x= "Longitude", y="Latitude", color = "Stand. dev. of elev. across sub-watersheds") +
   geom_sf(data = nc_state_bounds_geom, fill = NA, inherit.aes=FALSE) +
   theme_bw()
 dev.off()
