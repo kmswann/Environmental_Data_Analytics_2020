@@ -42,6 +42,46 @@
   pdfcreator={LaTeX via pandoc}}
 \urlstyle{same} % disable monospaced font for URLs
 \usepackage[margin=2.54cm]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 \usepackage{graphicx,grffile}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
@@ -112,9 +152,64 @@ The completed exercise is due on Tuesday, February 25 at 1:00 pm.
   Build a ggplot theme and set it as your default theme.
 \end{enumerate}
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#-------------------------------------------------------------------------------------------------}
+\CommentTok{#1: Loading Packages}
+\NormalTok{pkgs =}\StringTok{ }\KeywordTok{c}\NormalTok{(}
+  \StringTok{"tidyverse"}\NormalTok{,}
+  \StringTok{"nlme"}\NormalTok{,}
+  \StringTok{"piecewiseSEM"}
+\NormalTok{)}
+\NormalTok{i =}\StringTok{ }\NormalTok{pkgs[}\OperatorTok{!}\NormalTok{pkgs }\OperatorTok{%in%}\StringTok{ }\KeywordTok{installed.packages}\NormalTok{()]}
+\ControlFlowTok{if}\NormalTok{(}\KeywordTok{length}\NormalTok{(i) }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{)}
+  \KeywordTok{install.packages}\NormalTok{(i)}
+\KeywordTok{lapply}\NormalTok{(pkgs, library, }\DataTypeTok{character.only =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [[1]]
+##  [1] "forcats"   "stringr"   "dplyr"     "purrr"     "readr"     "tidyr"    
+##  [7] "tibble"    "ggplot2"   "tidyverse" "stats"     "graphics"  "grDevices"
+## [13] "utils"     "datasets"  "methods"   "base"     
+## 
+## [[2]]
+##  [1] "nlme"      "forcats"   "stringr"   "dplyr"     "purrr"     "readr"    
+##  [7] "tidyr"     "tibble"    "ggplot2"   "tidyverse" "stats"     "graphics" 
+## [13] "grDevices" "utils"     "datasets"  "methods"   "base"     
+## 
+## [[3]]
+##  [1] "piecewiseSEM" "nlme"         "forcats"      "stringr"      "dplyr"       
+##  [6] "purrr"        "readr"        "tidyr"        "tibble"       "ggplot2"     
+## [11] "tidyverse"    "stats"        "graphics"     "grDevices"    "utils"       
+## [16] "datasets"     "methods"      "base"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#1}
+\KeywordTok{getwd}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
 \begin{verbatim}
 ## [1] "C:/Users/krist/Box Sync/Spring 2020/R/Environmental_Data_Analytics_2020"
 \end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cpraw <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv"}\NormalTok{)}
+\NormalTok{litter <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"./Data/Processed/NEON_NIWO_Litter_mass_trap_Processed.csv"}\NormalTok{)}
+
+\CommentTok{#2}
+\NormalTok{blahtheme <-}\StringTok{ }\KeywordTok{theme_classic}\NormalTok{(}\DataTypeTok{base_size =} \DecValTok{14}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{color =} \StringTok{"darkblue"}\NormalTok{), }\DataTypeTok{axis.ticks =} \KeywordTok{element_line}\NormalTok{(}\DataTypeTok{colour =} \StringTok{'darkseagreen4'}\NormalTok{, }\DataTypeTok{size =} \DecValTok{2}\NormalTok{, }\DataTypeTok{linetype =} \StringTok{'dashed'}\NormalTok{), }\DataTypeTok{axis.ticks.length =} \KeywordTok{unit}\NormalTok{(}\DecValTok{1}\NormalTok{, }\StringTok{"cm"}\NormalTok{),}
+        \DataTypeTok{legend.position =} \StringTok{"bottom"}\NormalTok{)}
+  
+\KeywordTok{theme_set}\NormalTok{(blahtheme)       }
+\end{Highlighting}
+\end{Shaded}
 
 \hypertarget{ntl-lter-test}{%
 \subsection{NTL-LTER test}\label{ntl-lter-test}}
@@ -153,6 +248,22 @@ Lakes LTER?
   regression on the recommended set of variables.
 \end{enumerate}
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#3}
+\NormalTok{cp <-}\StringTok{ }
+\StringTok{  }\NormalTok{cpraw }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(daynum }\OperatorTok{>}\StringTok{ }\DecValTok{181} \OperatorTok{&}\StringTok{ }\NormalTok{daynum }\OperatorTok{<}\StringTok{ }\DecValTok{213}\NormalTok{)}\OperatorTok{%>%}
+\StringTok{ }\KeywordTok{select}\NormalTok{(lakename, year4, daynum, depth, temperature_C)}\OperatorTok{%>%}
+\StringTok{   }\KeywordTok{na.exclude}\NormalTok{()}
+
+\CommentTok{#4}
+\NormalTok{cpaic <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ cp, temperature_C }\OperatorTok{~}\StringTok{ }\NormalTok{lakename }\OperatorTok{+}\StringTok{ }\NormalTok{year4 }\OperatorTok{+}\StringTok{ }
+\StringTok{              }\NormalTok{daynum }\OperatorTok{+}\StringTok{ }\NormalTok{depth)}
+\KeywordTok{step}\NormalTok{(cpaic)}
+\end{Highlighting}
+\end{Shaded}
+
 \begin{verbatim}
 ## Start:  AIC=24461.34
 ## temperature_C ~ lakename + year4 + daynum + depth
@@ -181,6 +292,14 @@ Lakes LTER?
 ##                    year4                    daynum                     depth  
 ##                 -0.01588                   0.04157                  -1.96540
 \end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cpmodel <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\DataTypeTok{formula =}\NormalTok{ temperature_C }\OperatorTok{~}\StringTok{ }\NormalTok{lakename }\OperatorTok{+}\StringTok{ }\NormalTok{year4 }\OperatorTok{+}\StringTok{ }\NormalTok{daynum }\OperatorTok{+}\StringTok{ }\NormalTok{depth, }
+    \DataTypeTok{data =}\NormalTok{ cp)}
+\KeywordTok{summary}\NormalTok{(cpmodel)}
+\end{Highlighting}
+\end{Shaded}
 
 \begin{verbatim}
 ## 
@@ -310,7 +429,7 @@ conditions include total depth, so there's an interaction.
   pretty.
 \end{enumerate}
 
-\includegraphics{A07_GLMs_Week2_files/figure-latex/unnamed-chunk-4-1.pdf}
+\includegraphics{A07_GLMs_Week2_files/figure-latex/unnamed-chunk-5-1.pdf}
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}

@@ -29,7 +29,7 @@ The completed exercise is due on Tuesday, February 25 at 1:00 pm.
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, eval=TRUE)
 ```
 
-```{r SettingSession, include=FALSE}
+```{r echo=T}
 #-------------------------------------------------------------------------------------------------
 #1: Loading Packages
 pkgs = c(
@@ -44,7 +44,7 @@ lapply(pkgs, library, character.only = TRUE)
 
 ```
 
-```{r, message = FALSE}
+```{r echo=T}
 
 #1
 getwd()
@@ -72,7 +72,7 @@ Research question: What is the best set of predictors for lake temperatures in J
 
 4. Run an AIC to determine what set of explanatory variables (year4, daynum, depth) is best suited to predict temperature. Run a multiple regression on the recommended set of variables. 
 
-```{r, message = FALSE}
+```{r echo=T}
 #3
 cp <- 
   cpraw %>%
